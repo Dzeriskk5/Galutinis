@@ -1,0 +1,111 @@
+name: Terraform plan / apply / destroy
+
+on:
+    workflow_dispatch:
+        inputs:
+            environment:
+                type: choice
+                description: Environment
+                options:
+                    - dev
+                    - stage
+                    - prod
+                    - all
+                default: test
+            action:
+                description: Choose plan/apply or destroy
+                required: true
+                default: "plan/apply"
+                type: choice
+                options:
+                    - plan/apply
+                    - destroy
+jobs:
+    terraform:
+        name: Terraform plan/apply/destroy
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ./Infra/dev
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v4
+
+            - name: Setup Terraform
+              uses: hashicorp/setup-terraform@v2
+              with:
+                terraform_version: 1.5.6
+
+            - name: Export AWS credentials
+              run: |
+                echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
+                echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
+                echo "AWS_DEFAULT_REGION=eu-central-1" >> $GITHUB_ENV
+
+            - name: Create S3 bucket and dynamodb table if chose plan/apply
+              if: ${{ github.event.inputs.action == 'plan/apply' }}
+              run: |
+               aws s3api create-bucket --bucket mock-tfstate-bucket --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1 || true
+               aws s3api put-bucket-versioning --bucket mock-tfstate-bucket --versioning-configuration Status=Enabled
+               aws s3api put-bucket-encryption --bucket mock-tfstate-bucket --server-side-encryption-configuration '{ "Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
+               aws dynamodb create-table --table-name mock-tfstate-lock --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 || true
+
+            - name: Terraform init
+              run: terraform init
+
+            - name: Terraform Validate
+              run: terraform validate
+
+            - name: Perform chosen action
+              env:
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              run: |
+                if [ "${{ github.event.inputs.action }}" == "plan/apply" ]; then
+                  terraform plan -var-file=${{ github.event.inputs.environment }}.tfvars;
+                  terraform apply -auto-approve -var-file=${{ github.event.inputs.environment }}.tfvars;
+                elif [ "${{ github.event.inputs.action }}" == "destroy" ]; then
+                  terraform destroy -auto-approve -var-file=${{ github.event.inputs.environment }}.tfvars;
+                else
+                  echo "Invalid action: ${{ github.event.inputs.action }}";
+                  exit 1;
+                fi
+
+            - name: Delete S3 bucket and DynamoDB table (if destroy)
+              if: ${{ github.event.inputs.action == 'destroy' }}
+              run: |
+                # Trinam viską iš kibiro pt1
+                aws s3api list-object-versions --bucket mock-tfstate-bucket --query "Versions[].{Key:Key,VersionId:VersionId}" --output json > delete-versions.json
+                if [ -s delete-versions.json ] && [ "$(cat delete-versions.json)" != "null" ]; then
+                    for version in $(cat delete-versions.json | jq -c '.[]'); do
+                      key=$(echo $version | jq -r '.Key')
+                      versionId=$(echo $version | jq -r '.VersionId')
+                      aws s3api delete-object --bucket mock-tfstate-bucket --key "$key" --version-id "$versionId"
+                    done
+                fi
+
+                # Trinam viską iš kibiro pt2
+                aws s3api list-object-versions --bucket mock-tfstate-bucket --query "DeleteMarkers[].{Key:Key,VersionId:VersionId}" --output json > delete-markers.json
+                if [ -s delete-markers.json ] && [ "$(cat delete-markers.json)" != "null" ]; then
+                    for marker in $(cat delete-markers.json | jq -c '.[]'); do
+                      key=$(echo $marker | jq -r '.Key')
+                      versionId=$(echo $marker | jq -r '.VersionId')
+                      aws s3api delete-object --bucket mock-tfstate-bucket --key "$key" --version-id "$versionId"
+                    done
+                fi
+
+                # Tikrinam ar kibiras tuščias
+                remaining_objects=$(aws s3api list-objects-v2 --bucket mock-tfstate-bucket --query "Contents[].Key" --output json)
+                if [ "$remaining_objects" != "[]" ] && [ "$remaining_objects" != "null" ]; then
+                  exit 1
+                fi
+
+                # Trinam kibirą
+                aws s3api delete-bucket --bucket mock-tfstate-bucket --region eu-central-1 || true
+
+                # Trinam lentelę
+                aws dynamodb delete-table --table-name mock-tfstate-lock || true
+
+
+
+            

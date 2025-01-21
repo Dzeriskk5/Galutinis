@@ -8,11 +8,11 @@ terraform {
 
     required_version = ">= 1.2.0"
     backend "s3" {
-        bucket         = "AWSKibiriukasGalutiniam"
+        bucket         = "Kibirs-tfstate-bucket"
         key            = "terraform.tfstate"
         region         = "eu-central-1"
         encrypt        = true
-        dynamodb_table = "mock-tfstate-lock"
+        dynamodb_table = "Kibirs-tfstate-lock"
     }
 }
 

@@ -8,7 +8,7 @@ terraform {
 
     required_version = ">= 1.2.0"
     backend "s3" {
-        bucket         = "mock-tfstate-bucket"
+        bucket         = "AWSKibiriukasGalutiniam"
         key            = "terraform.tfstate"
         region         = "eu-central-1"
         encrypt        = true

@@ -12,5 +12,5 @@ variable "environment" {
 
 variable "key_name" {
     type = string
-    default = "mock_ssh"
+    default = "AWSraktelisGalutiniam"
 }

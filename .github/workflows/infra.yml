@@ -46,8 +46,8 @@ jobs:
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               run: |
                aws s3api create-bucket --bucket AWSKibiriukasGalutiniam --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1 || true
-               aws s3api put-bucket-versioning --bucket mock-tfstate-bucket --versioning-configuration Status=Enabled
-               aws s3api put-bucket-encryption --bucket mock-tfstate-bucket --server-side-encryption-configuration '{ "Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
+               aws s3api put-bucket-versioning --bucket AWSKibiriukasGalutiniam --versioning-configuration Status=Enabled
+               aws s3api put-bucket-encryption --bucket AWSKibiriukasGalutiniam --server-side-encryption-configuration '{ "Rules": [{"ApplyServerSideEncryptionByDefault": {"SSEAlgorithm": "AES256"}}]}'
                aws dynamodb create-table --table-name mock-tfstate-lock --attribute-definitions AttributeName=LockID,AttributeType=S --key-schema AttributeName=LockID,KeyType=HASH --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 || true
 
             - name: Terraform init
@@ -75,33 +75,33 @@ jobs:
               if: ${{ github.event.inputs.action == 'destroy' }}
               run: |
                 # Trinam viską iš kibiro pt1
-                aws s3api list-object-versions --bucket mock-tfstate-bucket --query "Versions[].{Key:Key,VersionId:VersionId}" --output json > delete-versions.json
+                aws s3api list-object-versions --bucket AWSKibiriukasGalutiniam --query "Versions[].{Key:Key,VersionId:VersionId}" --output json > delete-versions.json
                 if [ -s delete-versions.json ] && [ "$(cat delete-versions.json)" != "null" ]; then
                     for version in $(cat delete-versions.json | jq -c '.[]'); do
                       key=$(echo $version | jq -r '.Key')
                       versionId=$(echo $version | jq -r '.VersionId')
-                      aws s3api delete-object --bucket mock-tfstate-bucket --key "$key" --version-id "$versionId"
+                      aws s3api delete-object --bucket AWSKibiriukasGalutiniam --key "$key" --version-id "$versionId"
                     done
                 fi
 
                 # Trinam viską iš kibiro pt2
-                aws s3api list-object-versions --bucket mock-tfstate-bucket --query "DeleteMarkers[].{Key:Key,VersionId:VersionId}" --output json > delete-markers.json
+                aws s3api list-object-versions --bucket AWSKibiriukasGalutiniam --query "DeleteMarkers[].{Key:Key,VersionId:VersionId}" --output json > delete-markers.json
                 if [ -s delete-markers.json ] && [ "$(cat delete-markers.json)" != "null" ]; then
                     for marker in $(cat delete-markers.json | jq -c '.[]'); do
                       key=$(echo $marker | jq -r '.Key')
                       versionId=$(echo $marker | jq -r '.VersionId')
-                      aws s3api delete-object --bucket mock-tfstate-bucket --key "$key" --version-id "$versionId"
+                      aws s3api delete-object --bucket AWSKibiriukasGalutiniam --key "$key" --version-id "$versionId"
                     done
                 fi
 
                 # Tikrinam ar kibiras tuščias
-                remaining_objects=$(aws s3api list-objects-v2 --bucket mock-tfstate-bucket --query "Contents[].Key" --output json)
+                remaining_objects=$(aws s3api list-objects-v2 --bucket AWSKibiriukasGalutiniam --query "Contents[].Key" --output json)
                 if [ "$remaining_objects" != "[]" ] && [ "$remaining_objects" != "null" ]; then
                   exit 1
                 fi
 
                 # Trinam kibirą
-                aws s3api delete-bucket --bucket mock-tfstate-bucket --region eu-central-1 || true
+                aws s3api delete-bucket --bucket AWSKibiriukasGalutiniam --region eu-central-1 || true
 
                 # Trinam lentelę
                 aws dynamodb delete-table --table-name mock-tfstate-lock || true

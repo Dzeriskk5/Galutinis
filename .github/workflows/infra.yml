@@ -36,25 +36,15 @@ jobs:
               with:
                 terraform_version: 1.5.6
 
-            - name: Debug AWS Credentials
-              run: |
-                echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
-                echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-
-            - name: Debug Environment Variables
+            - name: Terraform Debug
               env:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                AWS_DEFAULT_REGION: eu-central-1
               run: |
-                echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID"
-                echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY"
-            - name: Test AWS Secrets
-              env:
-                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-              run: |
-                echo "Testing AWS_ACCESS_KEY_ID: $AWS_ACCESS_KEY_ID"
-                echo "Testing AWS_SECRET_ACCESS_KEY: $AWS_SECRET_ACCESS_KEY"
+                terraform init
+                terraform validate
+                terraform plan -var-file=${{ github.event.inputs.environment }}.tfvars
 
 
             - name: Export AWS credentials

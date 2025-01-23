@@ -1,0 +1,81 @@
+---
+- name: Prepare VM for Docker
+  hosts: all
+  become: true
+
+  tasks:
+    # Update apt repository and cache
+    - name: Update apt repository and cache
+      apt:
+        update_cache: yes
+
+    # Install required packages using apt
+    - name: Install required packages
+      apt:
+        name: 
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    # Add Docker GPG key
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    # Add Docker repository for package manager
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    # Install Docker
+    - name: Install Docker
+      apt:
+        name: 
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+
+    #Create user
+    - name: Adding user to Docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    # Ensure Docker service is running
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    # Ensure user is added to the Docker group
+    - name: Print logout message
+      debug:
+        msg: >
+          The user "{{ ansible_user }}" has been added to the 'docker' group.
+          Please log out and log back in for this change to take effect.
+
+    # Verify Docker installation
+    - name: Verify Docker installation
+      shell: docker --version
+      register: docker_version
+      ignore_errors: yes
+      args:
+        executable: /bin/bash
+
+    # Check if Docker installation was successful
+    - name: Check Docker installation success
+      fail:
+        msg: "Docker installation failed. Please check the logs and try again."
+      when: docker_version.rc != 0
+
+    # Print Docker version
+    - name: Docker version
+      debug:
+        msg: "Docker installed successfully: {{ docker_version.stdout }}"

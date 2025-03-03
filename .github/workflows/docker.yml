@@ -23,10 +23,11 @@ jobs:
               uses: actions/download-artifact@v4
               with:
                 name: instance-ip
+                path: ./Ansible
 
 
             - name: Read instance IP from file
-              run: echo "INSTANCE_IP=$(cat instance_ip.txt)" >> $GITHUB_ENV
+              run: echo "INSTANCE_IP=$(cat ./Ansible/instance_ip.txt)" >> $GITHUB_ENV
 
             - name: Create SSH directory
               run: mkdir -p ~/.ssh

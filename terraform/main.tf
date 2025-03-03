@@ -97,3 +97,7 @@ resource "aws_eip" "ip" {
     instance = aws_instance.main-vm.id
     depends_on = [aws_internet_gateway.main]
 }
+output "instance_ip" {
+    description = "Public IP of VM"
+    value       = aws_instance.main-vm.public_ip
+}

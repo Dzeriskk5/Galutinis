@@ -74,9 +74,17 @@ jobs:
             - name: Save instance IP to file
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               run: |
-                terraform output -raw instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > ../Ansible/instance_ip.txt
-                echo "Instance IP saved to: ../Ansible/instance_ip.txt"
-                cat ../Ansible/instance_ip.txt
+                terraform output -raw instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > $GITHUB_WORKSPACE/Ansible/instance_ip.txt
+                echo "Instance IP saved to: $GITHUB_WORKSPACE/Ansible/instance_ip.txt"
+                cat $GITHUB_WORKSPACE/Ansible/instance_ip.txt
+
+            - name: Upload instance IP as artifact
+              if: ${{ github.event.inputs.action == 'plan/apply' }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: instance-ip
+                path: $GITHUB_WORKSPACE/Ansible/instance_ip.txt
+
 
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}

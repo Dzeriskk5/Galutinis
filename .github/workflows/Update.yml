@@ -9,7 +9,7 @@ on:
                 default: SlaptasIPAdresas
 jobs:
 
-    install-docker:
+    Update-Files:
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -24,20 +24,6 @@ jobs:
 
             - name: Add host to known_hosts
               run: ssh-keyscan -H ${{ github.event.inputs.ip }} >> ~/.ssh/known_hosts
-
-            - name: Check and Install Ansible
-              run: |
-                if ! command -v ansible &> /dev/null; then
-                  echo "Ansible not found. Installing..."
-                  sudo apt-get update && sudo apt-get install -y ansible
-                else
-                  echo "Ansible is already installed."
-                fi
-            - name: Ensure everything is up to date
-              run: |
-                sudo dpkg --configure -a
-                sudo apt-get update --fix-missing
-                sudo apt-get -f install 
 
             - name: Setup SSH key for connection to AWS VM
               run: |

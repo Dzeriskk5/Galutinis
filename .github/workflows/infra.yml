@@ -71,28 +71,33 @@ jobs:
                   exit 1;
                 fi
 
-            - name: Save instance IP to file
+            - name: Save instance IP to cache
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               run: |
-                terraform output -raw instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > ../Ansible/instance_ip.txt
-                echo "Instance IP saved to: ../Ansible/instance_ip.txt"
-                cat ../Ansible/instance_ip.txt
+                instance_ip=$(terraform output -raw instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1)
+                echo "Instance IP saved: $instance_ip"
+                # Save the instance IP to the GitHub cache
+                echo $instance_ip > $GITHUB_WORKSPACE/instance_ip.txt
             
-            - name: Copy instance IP to workspace
+            - name: Cache instance IP
               if: ${{ github.event.inputs.action == 'plan/apply' }}
-              run: |
-                mkdir -p $GITHUB_WORKSPACE/instance_ip
-                cp ../Ansible/instance_ip.txt $GITHUB_WORKSPACE/instance_ip/instance_ip.txt
-                echo "Copied instance IP to: $GITHUB_WORKSPACE/instance_ip/instance_ip.txt"
-                # Debug: Verify if the file exists
-                ls -l $GITHUB_WORKSPACE/instance_ip/
+              uses: actions/cache@v3
+              with:
+                path: $GITHUB_WORKSPACE/instance_ip.txt
+                key: instance-ip-${{ runner.os }}-${{ hashFiles('**/instance_ip.txt') }}
+                restore-keys: |
+                  instance-ip-${{ runner.os }}-
             
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}
-              uses: actions/upload-artifact@v4
-              with:
-                name: instance-ip
-                path: $GITHUB_WORKSPACE/instance_ip/instance_ip.txt
+              run: |
+                # Check if the file exists in the cache first
+                if [ -f $GITHUB_WORKSPACE/instance_ip.txt ]; then
+                  cat $GITHUB_WORKSPACE/instance_ip.txt
+                else
+                  echo "No instance IP found in cache."
+                fi
+
 
 
 

@@ -83,7 +83,7 @@ jobs:
     
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: instance-ip
                 path: $GITHUB_WORKSPACE/instance_ip.txt

@@ -25,7 +25,7 @@
     # Copying main_app.py into the VM
     - name: Copy main.py from repo to ec2
       ansible.builtin.copy:
-        src: ./WorkingDir/main.py
+        src: ../WorkingDir/main.py
         dest: /home/ubuntu/api_app/
         owner: ubuntu
         group: ubuntu
@@ -34,7 +34,7 @@
       # Copying the Dockerfile into the vm
     - name: Copy Dockerfile from repo to ec2
       ansible.builtin.copy:
-        src: ./WorkingDir/Dockerfile
+        src: ../WorkingDir/Dockerfile
         dest: /home/ubuntu/api_app/
         owner: ubuntu
         group: ubuntu
@@ -43,7 +43,7 @@
       # Copying requirements.txt into the vm
     - name: Copy requirements.txt from repo to ec2
       ansible.builtin.copy:
-        src: ./WorkingDir/requirements.txt
+        src: ../WorkingDir/requirements.txt
         dest: /home/ubuntu/api_app/
         owner: ubuntu
         group: ubuntu

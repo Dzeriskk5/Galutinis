@@ -71,6 +71,16 @@ jobs:
                   exit 1;
                 fi
 
+            - name: Save instance IP to file
+              run: |
+                terraform output -raw instance_ip > instance_ip.txt
+
+            - name: Upload instance IP as artifact
+              uses: actions/upload-artifact@v3
+              with:
+                name: instance-ip
+                path: terraform/instance_ip.txt
+
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}
               run: |

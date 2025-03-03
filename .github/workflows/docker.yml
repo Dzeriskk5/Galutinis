@@ -5,31 +5,33 @@ on:
         inputs:
             environment:
                 type: choice
-                description: Pasirinkimas
+                description: Choose Environment
                 options:
                     - dev
                 default: dev
-            ip:
-                type: string
-                description: Enter the IP
-                default: SlaptasIPAdresas
 jobs:
-
     install-docker:
         runs-on: ubuntu-latest
         defaults:
             run:
               working-directory: ./Ansible
         steps:
-        #Checkout code so that the palybook is accessible
             - name: Checkout code
               uses: actions/checkout@v3
+
+            - name: Download instance IP artifact
+              uses: actions/download-artifact@v3
+              with:
+                name: instance-ip
+
+            - name: Read instance IP from file
+              run: echo "INSTANCE_IP=$(cat instance_ip.txt)" >> $GITHUB_ENV
 
             - name: Create SSH directory
               run: mkdir -p ~/.ssh
 
             - name: Add host to known_hosts
-              run: ssh-keyscan -H ${{ github.event.inputs.ip }} >> ~/.ssh/known_hosts
+              run: ssh-keyscan -H $INSTANCE_IP >> ~/.ssh/known_hosts
 
             - name: Check and Install Ansible
               run: |
@@ -39,6 +41,7 @@ jobs:
                 else
                   echo "Ansible is already installed."
                 fi
+
             - name: Ensure everything is up to date
               run: |
                 sudo dpkg --configure -a
@@ -52,4 +55,4 @@ jobs:
                 chmod 600 ~/.ssh/id_rsa
 
             - name: Run ansible playbook to install Docker
-              run: ansible-playbook -u ubuntu -i ${{ github.event.inputs.ip }}, --private-key ~/.ssh/id_rsa Docker.yaml
+              run: ansible-playbook -u ubuntu -i $INSTANCE_IP, --private-key ~/.ssh/id_rsa Docker.yaml

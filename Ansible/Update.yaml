@@ -21,3 +21,30 @@
     - name: Docker version
       debug:
         msg: "Docker installed successfully: {{ docker_version.stdout }}"
+        
+    # Copying main_app.py into the VM
+    - name: Copy main.py from repo to ec2
+      ansible.builtin.copy:
+        src: ../main_app.py
+        dest: /home/ubuntu/api_app/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+      # Copying the Dockerfile into the vm
+    - name: Copy Dockerfile from repo to ec2
+      ansible.builtin.copy:
+        src: ../Dockerfile
+        dest: /home/ubuntu/api_app/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+      # Copying requirements.txt into the vm
+    - name: Copy requirements.txt from repo to ec2
+      ansible.builtin.copy:
+        src: ../requirements.txt
+        dest: /home/ubuntu/api_app/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'

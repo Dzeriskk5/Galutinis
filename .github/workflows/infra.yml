@@ -84,6 +84,8 @@ jobs:
                 mkdir -p $GITHUB_WORKSPACE/instance_ip
                 cp ../Ansible/instance_ip.txt $GITHUB_WORKSPACE/instance_ip/instance_ip.txt
                 echo "Copied instance IP to: $GITHUB_WORKSPACE/instance_ip/instance_ip.txt"
+                # Debug: Verify if the file exists
+                ls -l $GITHUB_WORKSPACE/instance_ip/
             
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}
@@ -91,6 +93,7 @@ jobs:
               with:
                 name: instance-ip
                 path: $GITHUB_WORKSPACE/instance_ip/instance_ip.txt
+
 
 
 

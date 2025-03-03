@@ -77,13 +77,21 @@ jobs:
                 terraform output -raw instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > ../Ansible/instance_ip.txt
                 echo "Instance IP saved to: ../Ansible/instance_ip.txt"
                 cat ../Ansible/instance_ip.txt
-
+            
+            - name: Copy instance IP to workspace
+              if: ${{ github.event.inputs.action == 'plan/apply' }}
+              run: |
+                mkdir -p $GITHUB_WORKSPACE/instance_ip
+                cp ../Ansible/instance_ip.txt $GITHUB_WORKSPACE/instance_ip/instance_ip.txt
+                echo "Copied instance IP to: $GITHUB_WORKSPACE/instance_ip/instance_ip.txt"
+            
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               uses: actions/upload-artifact@v4
               with:
                 name: instance-ip
-                path: ../Ansible/instance_ip.txt
+                path: $GITHUB_WORKSPACE/instance_ip/instance_ip.txt
+
 
 
 

@@ -1,0 +1,49 @@
+name: Setup Docker on the VM with Ansible
+
+on:
+    workflow_dispatch:
+        inputs:
+            ip:
+                type: string
+                description: Enter the IP
+                default: SlaptasIPAdresas
+jobs:
+
+    install-docker:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+              working-directory: ./Ansible
+        steps:
+        #Checkout code so that the palybook is accessible
+            - name: Checkout code
+              uses: actions/checkout@v4
+              
+            - name: Create SSH directory
+              run: mkdir -p ~/.ssh
+
+            - name: Add host to known_hosts
+              run: ssh-keyscan -H ${{ github.event.inputs.ip }} >> ~/.ssh/known_hosts
+
+            - name: Check and Install Ansible
+              run: |
+                if ! command -v ansible &> /dev/null; then
+                  echo "Ansible not found. Installing..."
+                  sudo apt-get update && sudo apt-get install -y ansible
+                else
+                  echo "Ansible is already installed."
+                fi
+            - name: Ensure everything is up to date
+              run: |
+                sudo dpkg --configure -a
+                sudo apt-get update --fix-missing
+                sudo apt-get -f install 
+
+            - name: Setup SSH key for connection to AWS VM
+              run: |
+                mkdir -p ~/.ssh
+                echo "${{secrets.AWS_SSH_KEY}}" > ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa
+
+            - name: Run ansible playbook to update the code
+              run: ansible-playbook -u ubuntu -i ${{ github.event.inputs.ip }}, --private-key ~/.ssh/id_rsa Update.yaml

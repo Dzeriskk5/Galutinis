@@ -73,7 +73,9 @@ jobs:
 
             - name: Save instance IP to file
               if: ${{ github.event.inputs.action == 'plan/apply' }}
-              run: terraform output -raw instance_ip | tee instance_ip.txt
+              run: |
+                terraform output -raw instance_ip | awk 'NR==1 {print $1}' > instance_ip.txt
+
 
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}

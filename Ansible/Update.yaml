@@ -1,1 +1,23 @@
-asd
+---
+- name: Update Files inside VM
+  hosts: all
+  become: true
+
+  tasks:
+    # Update apt repository and cache
+    - name: Update apt repository and cache
+      apt:
+        update_cache: yes
+
+    # Verify Docker installation
+    - name: Verify Docker installation
+      shell: docker --version
+      register: docker_version
+      ignore_errors: yes
+      args:
+        executable: /bin/bash
+
+    # Print Docker version
+    - name: Docker version
+      debug:
+        msg: "Docker installed successfully: {{ docker_version.stdout }}"

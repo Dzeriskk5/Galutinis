@@ -74,37 +74,19 @@ jobs:
 
 
                 
-            - name: Save instance IP to cache
+            - name: Save instance IP to file
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               run: |
                 instance_ip=$(terraform output -raw instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1)
                 echo "Instance IP saved: $instance_ip"
-                # Save the instance IP to a file
-                echo $instance_ip > instance_ip.txt
-
-            - name: List files after saving instance IP
-              run: |
-                echo "Current directory: $(pwd)"
-                ls -alh  # List all files to ensure instance_ip.txt exists
-
-            - name: Cache instance IP
-              if: ${{ github.event.inputs.action == 'plan/apply' }}
-              uses: actions/cache@v3
-              with:
-                path: instance_ip.txt  # Use the file name directly
-                key: instance-ip-${{ runner.os }}-${{ hashFiles('instance_ip.txt') }}  # Correct hashing for caching
-                restore-keys: |
-                  instance-ip-${{ runner.os }}
+                echo $instance_ip > $GITHUB_WORKSPACE/instance_ip.txt
     
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}
-              run: |
-                # Check if the file exists in the cache first
-                if [ -f $GITHUB_WORKSPACE/instance_ip.txt ]; then
-                  cat $GITHUB_WORKSPACE/instance_ip.txt
-                else
-                  echo "No instance IP found in cache."
-                fi
+              uses: actions/upload-artifact@v3
+              with:
+                name: instance-ip
+                path: $GITHUB_WORKSPACE/instance_ip.txt
 
 
 

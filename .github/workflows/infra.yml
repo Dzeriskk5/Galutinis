@@ -72,8 +72,8 @@ jobs:
                 fi
 
             - name: Save instance IP to file
-              run: |
-                terraform output -raw instance_ip > instance_ip.txt
+              run: terraform output -raw instance_ip | tee instance_ip.txt
+
 
             - name: Upload instance IP as artifact
               uses: actions/upload-artifact@v4

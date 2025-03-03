@@ -84,9 +84,9 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: $GITHUB_WORKSPACE/instance_ip.txt
-                key: instance-ip-${{ runner.os }}-${{ hashFiles('**/instance_ip.txt') }}
+                key: instance-ip-${{ runner.os }}  # Use a consistent cache key
                 restore-keys: |
-                  instance-ip-${{ runner.os }}-
+                  instance-ip-${{ runner.os }}  # Use a restore key if exact match is not found
             
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}
@@ -97,6 +97,7 @@ jobs:
                 else
                   echo "No instance IP found in cache."
                 fi
+
 
 
 

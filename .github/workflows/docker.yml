@@ -23,7 +23,7 @@ jobs:
         steps:
         #Checkout code so that the palybook is accessible
             - name: Checkout code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Create SSH directory
               run: mkdir -p ~/.ssh

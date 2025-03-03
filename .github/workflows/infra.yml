@@ -71,23 +71,22 @@ jobs:
                   exit 1;
                 fi
 
-            - name: Save instance IP to cache
+            - name: Save instance IP to file
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               run: |
                 instance_ip=$(terraform output -raw instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1)
                 echo "Instance IP saved: $instance_ip"
-                # Save the instance IP to the GitHub cache
-                echo $instance_ip > $GITHUB_WORKSPACE/instance_ip.txt
+                echo $instance_ip > $GITHUB_WORKSPACE/instance_ip.txt  # Ensure file is saved in the correct path
             
             - name: Cache instance IP
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               uses: actions/cache@v3
               with:
-                path: $GITHUB_WORKSPACE/instance_ip.txt
-                key: instance-ip-${{ runner.os }}  # Use a consistent cache key
+                path: $GITHUB_WORKSPACE/instance_ip.txt  # Path to file to cache
+                key: instance-ip-${{ runner.os }}-${{ hashFiles('**/instance_ip.txt') }}  # Cache key that uses hash of the file
                 restore-keys: |
-                  instance-ip-${{ runner.os }}  # Use a restore key if exact match is not found
-            
+                  instance-ip-${{ runner.os }}  # Restore key if exact match is not found
+
             - name: Upload instance IP as artifact
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               run: |

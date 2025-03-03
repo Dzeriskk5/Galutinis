@@ -98,6 +98,6 @@ resource "aws_eip" "ip" {
     depends_on = [aws_internet_gateway.main]
 }
 output "instance_ip" {
-    description = "Public IP of VM"
+    description = "Ze IP"
     value       = aws_instance.main-vm.public_ip
 }

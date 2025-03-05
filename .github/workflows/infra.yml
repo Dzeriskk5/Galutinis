@@ -89,7 +89,7 @@ jobs:
                 echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt
                 echo "VM_ip saved to: terraform/ip_cache/ec2_ip.txt"
 
-                mkdir -p ip_cache  # Ensure the directory exists
+                mkdir -p terraform/ip_cache  # Ensure the directory exists
                 echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt  # Save the IP address to the file
                 cat terraform/ip_cache/ec2_ip.txt
 

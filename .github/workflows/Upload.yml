@@ -3,7 +3,7 @@ name: Upload files
 on:
   push:
     paths:
-      - 'root/WorkingDir/**'
+      - 'WorkingDir/**'
   workflow_dispatch:
     inputs:
       ip:

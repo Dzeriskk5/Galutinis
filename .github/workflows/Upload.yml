@@ -22,6 +22,16 @@ jobs:
             - name: Create SSH directory
               run: mkdir -p ~/.ssh
 
+            - name: Restore EC2 IP Address
+              uses: actions/cache@v3
+              with:
+                path: terraform/ip_cache
+                key: ec2-ip-address
+                restore-keys: ec2-ip-address
+
+            - name: Show Cached IP Address
+              run: cat ip_cache/ec2_ip.txt
+
             - name: Add host to known_hosts
               run: ssh-keyscan -H ${{ github.event.inputs.ip }} >> ~/.ssh/known_hosts
 

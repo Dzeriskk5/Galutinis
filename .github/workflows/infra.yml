@@ -56,12 +56,6 @@ jobs:
 
             - name: Terraform Validate
               run: terraform validate
-            - name: Ensure the directory exists and store EC2 IP
-              run: |
-                ls -al ip_cache
-                mkdir -p ip_cache
-                # Debugging step: List the contents of the directory to confirm the file exists
-                ls -al ip_cache
 
             - name: Perform chosen action
               env:

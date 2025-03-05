@@ -71,35 +71,6 @@ jobs:
                   exit 1;
                 fi
                 terraform output instance_ip
-                
-            - name: Save instance IP to file
-              if: ${{ github.event.inputs.action == 'plan/apply' }}
-              run: |
-                # Run terraform output and save it to instance_ip.txt
-                terraform output instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > instance_ip.txt
-                
-                # Output the saved file location to confirm
-                echo "Instance IP saved to: instance_ip.txt"
-                cat instance_ip.txt  # Check if file exists and has content
-
-            - name: Set up SSH key
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                # Ensure SSH connections to GitHub don't prompt for confirmation
-                ssh-keyscan github.com >> ~/.ssh/known_hosts
-                
-            - name: Configure Git
-              run: |
-                git config --global user.name "Dzeriskk5"
-                git config --global user.email "dzeriskk@gmail.com"
-                
-            - name: Commit and push changes
-              run: |
-                git add instance_ip.txt
-                git commit -m "Update instance IP"
-                git push git@github.com:Dzeriskk5/Galutinis.git HEAD:main
 
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}
@@ -135,3 +106,41 @@ jobs:
 
                 # Trinam lentelę
                 aws dynamodb delete-table --table-name kibirs-tfstate-lock || true
+                
+            - name: Save instance IP to file
+              if: ${{ github.event.inputs.action == 'plan/apply' }}
+              run: |
+                echo "Current directory: $(pwd)"
+                # Run terraform output and save it to instance_ip.txt
+                terraform output instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > instance_ip.txt
+                
+                # Output the saved file location to confirm
+                echo "Instance IP saved to: instance_ip.txt"
+                cat instance_ip.txt  # Check if file exists and has content
+                
+            - name: Unset AWS Environment Variables before Git push
+              run: |
+                echo "Unsetting AWS environment variables to avoid conflicts with Git operations..."
+                unset AWS_ACCESS_KEY_ID
+                unset AWS_SECRET_ACCESS_KEY
+                unset AWS_DEFAULT_REGION
+                echo "AWS environment variables unset."
+
+            - name: Set up SSH key
+              run: |
+                mkdir -p ~/.ssh
+                echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+                chmod 600 ~/.ssh/id_rsa
+                # Ensure SSH connections to GitHub don't prompt for confirmation
+                ssh-keyscan github.com >> ~/.ssh/known_hosts
+                
+            - name: Configure Git
+              run: |
+                git config --global user.name "Dzeriskk5"
+                git config --global user.email "dzeriskk@gmail.com"
+                
+            - name: Commit and push changes
+              run: |
+                git add instance_ip.txt
+                git commit -m "Update instance IP"
+                git push git@github.com:Dzeriskk5/Galutinis.git HEAD:main

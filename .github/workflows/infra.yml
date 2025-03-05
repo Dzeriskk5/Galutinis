@@ -101,7 +101,7 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: terraform/ip_cache  # Path to the directory you want to cache
-                key: ${{ hashFiles('terraform/ip_cache/ec2_ip.txt') }}
+                key: ec2-ip-address-${{ hashFiles('terraform/ip_cache/ec2_ip.txt') }}
     
             - name: Store IP in cache
               run: |

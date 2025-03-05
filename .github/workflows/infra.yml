@@ -82,10 +82,10 @@ jobs:
                 echo "Instance IP saved to: instance_ip.txt"
                 cat instance_ip.txt  # Check if file exists and has content
 
-            - name: Setup SSH key for connection to GIT
+            - name: Set up SSH key
               run: |
                 mkdir -p ~/.ssh
-                echo "${{secrets.NaujasDzeris}}" > ~/.ssh/id_rsa
+                echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
                 chmod 600 ~/.ssh/id_rsa
                 # Ensure SSH connections to GitHub don't prompt for confirmation
                 ssh-keyscan github.com >> ~/.ssh/known_hosts

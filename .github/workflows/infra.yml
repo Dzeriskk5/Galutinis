@@ -88,15 +88,11 @@ jobs:
                 # Write the instance IP to the file
                 echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt
                 echo "VM_ip saved to: terraform/ip_cache/ec2_ip.txt"
-                
-            - name: Ensure the directory exists
-              run: |
+
                 mkdir -p ip_cache  # Ensure the directory exists
                 echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt  # Save the IP address to the file
                 cat terraform/ip_cache/ec2_ip.txt
-              env:
-                VM_ip: ${{ steps.get_ip.outputs.VM_ip }}  # Make sure you're passing the correct variable
-            
+
             - name: Cache EC2 IP Address
               uses: actions/cache@v3
               with:

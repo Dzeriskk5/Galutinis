@@ -25,13 +25,45 @@ jobs:
 
             - name: Show Cached IP Address
               run: |
-                cat terraform/ip_cache/ec2_ip.txt
+                if [ -f terraform/ip_cache/ec2_ip.txt ]; then
+                    cat terraform/ip_cache/ec2_ip.txt
+                else
+                    echo "File does not exist"
+                fi
+                echo "Displaying the contents of ec2_ip.txt:"
+                cat terraform/ip_cache/ec2_ip.txt            # Show contents of the file
+                
+                echo "Listing the files in terraform/ip_cache:"
+                ls -la terraform/ip_cache                    # List directory contents
+            
+                echo "Checking the file type of ec2_ip.txt:"
+                file terraform/ip_cache/ec2_ip.txt           # Display file type
+            
+                echo "Ensuring the file has read permissions:"
+                chmod +r terraform/ip_cache/ec2_ip.txt       # Ensure file is readable
+            
+                echo "Displaying the contents of ec2_ip.txt again:"
+                cat terraform/ip_cache/ec2_ip.txt            # Show contents again
+            
+                echo "Listing files in terraform/ip_cache again:"
+                ls -la terraform/ip_cache                    # List directory contents again
+            
+                echo "Checking the file type of ec2_ip.txt again:"
+                file terraform/ip_cache/ec2_ip.txt           # Check file type again
+            
+                echo "Showing the first 10 lines of the file:"
+                head terraform/ip_cache/ec2_ip.txt           # Display first 10 lines
+            
+                echo "Showing the last 10 lines of the file:"
+                tail terraform/ip_cache/ec2_ip.txt           # Display last 10 lines
+            
+                echo "Displaying the contents of ec2_ip.txt with line numbers:"
+                nl terraform/ip_cache/ec2_ip.txt             # Display with line numbers
+            
+                echo "Displaying the content with grep:"
+                grep "" terraform/ip_cache/ec2_ip.txt        # Print the entire file
+                echo "File path: terraform/ip_cache/ec2_ip.txt"
                 ls -la terraform/ip_cache
-                file terraform/ip_cache/ec2_ip.txt
-                chmod +r terraform/ip_cache/ec2_ip.txt
-                cat terraform/ip_cache/ec2_ip.txt
-                ls -la terraform/ip_cache
-                file terraform/ip_cache/ec2_ip.txt
               
             - name: Create SSH directory
               run: mkdir -p ~/.ssh

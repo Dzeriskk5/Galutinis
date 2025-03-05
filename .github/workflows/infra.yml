@@ -146,7 +146,7 @@ jobs:
             - name: Save IP to output
               run: |
                 # Set the output so that the next job can use it
-                echo "::set-output name=instance_ip::$instance_ip"
+                echo "instance_ip=$instance_ip" >> $GITHUB_OUTPUT
 
     IP:
         name: Another Job to Use update IP  
@@ -161,7 +161,6 @@ jobs:
 
           - name: Use the instance IP
             run: |
-              # Access the instance IP passed from the terraform job
               instance_ip="${{ needs.terraform.outputs.instance_ip }}"
               echo "The instance IP passed from terraform is: $instance_ip"
     

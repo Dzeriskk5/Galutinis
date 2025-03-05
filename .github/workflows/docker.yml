@@ -25,11 +25,24 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
+            - name: Read EC2 IP Address
+              id: read_ip
+              run: |
+                IP=$(cat terraform/ip_cache/ec2_ip.txt)
+                echo "IP=$IP" >> $GITHUB_OUTPUT # Set output variable
+            - name: Use the IP Address
+              run: |
+                echo "The EC2 IP address is: ${{ steps.read_ip.outputs.IP }}"
+    
+            - name: Set IP as environment variable.
+              run: |
+                echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
+
             - name: Create SSH directory
               run: mkdir -p ~/.ssh
 
             - name: Add host to known_hosts
-              run: ssh-keyscan -H ${{ github.event.inputs.ip }} >> ~/.ssh/known_hosts
+              run: ssh-keyscan -H ${{ EC2_IP }} >> ~/.ssh/known_hosts
 
             - name: Check and Install Ansible
               run: |
@@ -52,4 +65,4 @@ jobs:
                 chmod 600 ~/.ssh/id_rsa
 
             - name: Run ansible playbook to install Docker
-              run: ansible-playbook -u ubuntu -i ${{ github.event.inputs.ip }}, --private-key ~/.ssh/id_rsa Docker.yaml
+              run: ansible-playbook -u ubuntu -i ${{ EC2_IP }}, --private-key ~/.ssh/id_rsa Docker.yaml

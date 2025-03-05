@@ -101,9 +101,7 @@ jobs:
               with:
                 path: ip_cache  # Path to the directory you want to cache
                 key: ec2-ip-address-${{ github.run_id }}  # Unique key for caching
-                restore-keys: ec2-ip-address  # Fallback cache key if the main one is not found
-
-
+    
             - name: Store IP in cache
               run: |
                 # Ensure the directory exists

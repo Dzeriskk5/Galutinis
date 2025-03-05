@@ -20,7 +20,7 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: terraform/ip_cache
-                key: ec2-ip-address-${{ hashFiles('terraform/ip_cache/ec2_ip.txt') }}
+                key: ec2-ip-address-${{ hashFiles('terraform/ip_cache/**') }}
                 restore-keys: |
                   ec2-ip-address-
 

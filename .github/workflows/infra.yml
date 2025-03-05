@@ -70,6 +70,7 @@ jobs:
                   echo "Invalid action: ${{ github.event.inputs.action }}";
                   exit 1;
                 fi
+                terraform output instance_ip
 
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}

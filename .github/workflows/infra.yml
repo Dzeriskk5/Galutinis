@@ -157,7 +157,35 @@ jobs:
             uses: actions/download-artifact@v4
             with:
               name: instance-ip
-    
+          - name: List files in runner
+            run: |
+              # List the contents of the current directory to see where the file is
+              echo "Contents of /home/runner/work/Galutinis/Galutinis/:"
+              ls -l /home/runner/work/Galutinis/Galutinis/
+              echo "Contents of /home/runner/work/Galutinis/Galutinis/terraform/:"
+              ls -l /home/runner/work/Galutinis/Galutinis/terraform/
+              
+          - name: List files in current directory
+            run: |
+              # List the contents of the current directory to see where the file is
+              echo "Contents of current directory:"
+              ls -l
+              
+          - name: Move instance IP ZIP to /terraform directory
+            run: |
+              if [ -f /home/runner/work/Galutinis/Galutinis/instance-ip.zip ]; then
+                mv /home/runner/work/Galutinis/Galutinis/instance-ip.zip ./terraform/instance-ip.zip
+                echo "Moved instance-ip.zip to ./terraform"
+              else
+                echo "Error: instance_ip.zip not found in /home/runner/work/Galutinis/Galutinis/instance-ip.zip."
+              fi
+              if [ -f /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.zip ]; then
+                mv /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.zip ./terraform/instance-ip.zip
+                echo "Moved instance-ip.zip to ./terraform"
+              else
+                echo "Error: instance_ip.zip not found in /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.zip."
+              fi
+              
           - name: List files in current directory
             run: |
               # List the contents of the current directory to see where the file is
@@ -186,7 +214,6 @@ jobs:
           - name: Use instance IP in another job
             run: |
               cat ./terraform/instance_ip.txt
-              # Your logic to use the file data
     
           - name: Set up SSH key
             run: |

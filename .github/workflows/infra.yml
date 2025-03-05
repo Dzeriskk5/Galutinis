@@ -111,18 +111,19 @@ jobs:
               if: ${{ github.event.inputs.action == 'plan/apply' }}
               run: |
                 echo "Current runner directory: $(pwd)"
-                # Run terraform output and save it to instance_ip.txt
-                terraform output instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > terraform/instance_ip.txt
+                # Use GITHUB_WORKSPACE to reference the root of the repository and save the file in the terraform directory
+                echo "Saving instance IP to $GITHUB_WORKSPACE/terraform/instance_ip.txt"
+                terraform output instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > $GITHUB_WORKSPACE/terraform/instance_ip.txt
                 
                 # Output the saved file location to confirm
-                echo "Instance IP saved to: terraform/instance_ip.txt"
-                cat ./terraform/instance_ip.txt  # Check if file exists and has content
+                echo "Instance IP saved to: $GITHUB_WORKSPACE/terraform/instance_ip.txt"
+                cat $GITHUB_WORKSPACE/terraform/instance_ip.txt  # Check if file exists and has content
                 
             - name: Upload instance IP as artifact
               uses: actions/upload-artifact@v4
               with:
                 name: instance-ip
-                path: terraform/instance_ip.txt
+                path: $GITHUB_WORKSPACE/terraform/instance_ip.txt
     IP:
         name: Another Job to Use update IP  
         runs-on: ubuntu-latest

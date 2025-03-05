@@ -86,8 +86,8 @@ jobs:
                 mkdir -p terraform/ip_cache
                 
                 # Write the instance IP to the file
-                echo "$instance_ip" > terraform/ip_cache/ec2_ip.txt
-                echo "Instance IP saved to: terraform/ip_cache/ec2_ip.txt"
+                echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt
+                echo "VM_ip saved to: terraform/ip_cache/ec2_ip.txt"
                 
             - name: Ensure the directory exists
               run: |

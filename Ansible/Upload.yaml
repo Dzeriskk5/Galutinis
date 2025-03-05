@@ -3,7 +3,15 @@
   hosts: all
   become: true
 
-  tasks:       
+  tasks:
+    - name: Create api_app directory
+      ansible.builtin.file:
+        path: /home/ubuntu/api_app
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
     - name: Upload main.py
       ansible.builtin.copy:
         src: ../WorkingDir/main.py
@@ -11,6 +19,7 @@
         owner: ubuntu
         group: ubuntu
         mode: '0755'
+
     - name: Upload Dockerfile
       ansible.builtin.copy:
         src: ../WorkingDir/Dockerfile
@@ -18,6 +27,7 @@
         owner: ubuntu
         group: ubuntu
         mode: '0755'
+
     - name: Upload requirements.txt
       ansible.builtin.copy:
         src: ../WorkingDir/requirements.txt

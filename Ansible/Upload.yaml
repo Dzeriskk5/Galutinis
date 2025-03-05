@@ -1,10 +1,10 @@
 ---
-- name: Upload Files inside VM
+- name: Upload
   hosts: all
   become: true
 
   tasks:       
-    - name: Copy files to vm
+    - name: Upload files to VM
       ansible.builtin.copy:
         src: ../WorkingDir/main.py
         dest: /home/ubuntu/api_app/

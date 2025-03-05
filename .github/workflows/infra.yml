@@ -171,7 +171,7 @@ jobs:
               echo "Contents of current directory:"
               ls -l
               
-          - name: Move instance IP ZIP to /terraform directory
+          - name: Move instance IP ZIP/txt to /terraform directory
             run: |
               if [ -f /home/runner/work/Galutinis/Galutinis/instance-ip.zip ]; then
                 mv /home/runner/work/Galutinis/Galutinis/instance-ip.zip ./terraform/instance-ip.zip
@@ -184,6 +184,18 @@ jobs:
                 echo "Moved instance-ip.zip to ./terraform"
               else
                 echo "Error: instance_ip.zip not found in /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.zip."
+              fi
+              if [ -f /home/runner/work/Galutinis/Galutinis/instance-ip.txt ]; then
+                mv /home/runner/work/Galutinis/Galutinis/instance-ip.zip ./terraform/instance-ip.txt
+                echo "Moved instance-ip.txt to ./terraform"
+              else
+                echo "Error: instance_ip.zip not found in /home/runner/work/Galutinis/Galutinis/instance-ip.txt."
+              fi
+              if [ -f /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.txt ]; then
+                mv /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.txt ./terraform/instance-ip.txt
+                echo "Moved instance-ip.zip to ./terraform"
+              else
+                echo "Error: instance_ip.txt not found in /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.txt."
               fi
               
           - name: List files in current directory

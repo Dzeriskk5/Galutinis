@@ -126,6 +126,7 @@ jobs:
                 name: instance-ip
                 path: instance_ip.txt
                 overwrite: true
+                include-hidden-files: true
     IP:
         name: Another Job to Use update IP  
         runs-on: ubuntu-latest

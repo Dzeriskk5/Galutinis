@@ -100,7 +100,7 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: ip_cache  # Path to the directory you want to cache
-                key: ec2-ip-address-${{ github.run_id }}  # Unique key for caching
+                key: ec2-ip-address
     
             - name: Store IP in cache
               run: |

@@ -28,7 +28,6 @@ jobs:
             - name: Set IP as environment variable.
               run: |
                 echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
-                
               
             - name: Create SSH directory
               run: mkdir -p ~/.ssh

@@ -117,8 +117,23 @@ jobs:
                 
                 echo "Instance IP: $instance_ip"
                 
-                # Save the IP as an artifact
-                echo "$instance_ip" > ./terraform/instance_ip.txt
+                # Define the absolute path
+                file_path="${GITHUB_WORKSPACE}/terraform/instance_ip.txt"
+                    
+                # Create the terraform directory if it doesn't exist
+                mkdir -p "$(dirname "$file_path")"
+                    
+                # Write the instance IP to the file
+                echo "$instance_ip" > "$file_path"
+                echo "Instance IP saved to: $file_path"
+            - name: Check if instance IP file exists
+              run: |
+                if [ -f "${GITHUB_WORKSPACE}/terraform/instance_ip.txt" ]; then
+                  echo "File exists."
+                else
+                  echo "File does not exist."
+                  exit 1
+                fi
                 
             - name: Upload instance IP as artifact
               uses: actions/upload-artifact@v4

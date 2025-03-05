@@ -95,6 +95,19 @@ jobs:
                 echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt  # Save the IP address to the file
                 cat terraform/ip_cache/ec2_ip.txt
                 echo "VM_ip=$VM_ip" >> $GITHUB_ENV
+
+            - name: Commit changes
+              run: |
+                git config --global user.email "your-bot@example.com"
+                git config --global user.name "Your Bot"
+                git add terraform/ip_cache/ec2_ip.txt
+                git commit -m "Update EC2 IP address" || echo "No changes to commit"
+            
+            - name: Push changes
+              uses: ad-m/github-push-action@master
+              with:
+                github_token: ${{ secrets.GITHUB_TOKEN }}
+                branch: ${{ github.ref_name }} # Push to the current branch
                 
             - name: Compute file hash
               id: compute-hash

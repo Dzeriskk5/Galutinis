@@ -71,15 +71,13 @@ jobs:
                   echo "Invalid action: ${{ github.event.inputs.action }}";
                   exit 1;
                 fi
-                terraform output instance_ip
-                
-                # Capture raw Terraform output
-                rawinstance_ip=$(terraform output instance_ip)
+                # Capture Terraform output without quotes
+                rawinstance_ip=$(terraform output -raw instance_ip)
         
                 echo "Raw instance IP output: $rawinstance_ip"
         
                 # Pass raw output to GITHUB_OUTPUT
-                echo "rawinstance_ip=$rawinstance_ip" >> $GITHUB_OUTPUT
+                echo "rawinstance_ip=$rawinstance_ip" >> "$GITHUB_OUTPUT"
                 
 
             - name: Delete S3 bucket and DynamoDB table (if destroy)

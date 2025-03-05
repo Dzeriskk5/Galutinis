@@ -1,4 +1,4 @@
-name: Update files
+name: Upload files
 
 on:
     workflow_dispatch:
@@ -31,5 +31,5 @@ jobs:
                 echo "${{secrets.AWS_SSH_KEY}}" > ~/.ssh/id_rsa
                 chmod 600 ~/.ssh/id_rsa
 
-            - name: Run ansible playbook to update the code
+            - name: Run ansible playbook to upload the code
               run: ansible-playbook -u ubuntu -i ${{ github.event.inputs.ip }}, --private-key ~/.ssh/id_rsa Update.yaml

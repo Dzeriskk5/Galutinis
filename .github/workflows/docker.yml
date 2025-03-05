@@ -13,9 +13,6 @@ on:
 jobs:
   install-docker:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./Ansible
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -58,4 +55,4 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Run ansible playbook to install Docker
-        run: ansible-playbook -u ubuntu -i ${{ env.EC2_IP }}, --private-key ~/.ssh/id_rsa Docker.yaml || exit 1
+        run: ansible-playbook -u ubuntu -i ${{ env.EC2_IP }}, --private-key ~/.ssh/id_rsa Ansible/Docker.yaml || exit 1

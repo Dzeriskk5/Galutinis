@@ -89,12 +89,20 @@ jobs:
                 echo "$instance_ip" > ip_cache/ec2_ip.txt
                 echo "Instance IP saved to: ip_cache/ec2_ip.txt"
                 
+            - name: Ensure the directory exists
+              run: |
+                mkdir -p ip_cache  # Ensure the directory exists
+                echo "$VM_ip" > ip_cache/ec2_ip.txt  # Save the IP address to the file
+              env:
+                VM_ip: ${{ steps.get_ip.outputs.instance_ip }}  # Make sure you're passing the correct variable
+            
             - name: Cache EC2 IP Address
               uses: actions/cache@v3
               with:
-                path: ip_cache
-                key: ec2-ip-address
-                restore-keys: ec2-ip-address
+                path: ip_cache  # Path to the directory you want to cache
+                key: ec2-ip-address-${{ github.run_id }}  # Unique key for caching
+                restore-keys: ec2-ip-address  # Fallback cache key if the main one is not found
+
 
             - name: Store IP in cache
               run: |

@@ -84,8 +84,7 @@ jobs:
 
             - name: Commit and Push Instance IP
               run: |
-                git config --global user.name "github-actions[bot]"
-                git config --global user.email "github-actions[bot]@users.noreply.github.com"
+                git config --global user.name "Dzeriskk5"
                 git add instance_ip.txt
                 git commit -m "Save instance IP"
                 git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git HEAD:main

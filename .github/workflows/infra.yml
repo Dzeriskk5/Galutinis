@@ -99,7 +99,7 @@ jobs:
             - name: Cache EC2 IP Address
               uses: actions/cache@v3
               with:
-                path: ip_cache  # Path to the directory you want to cache
+                path: terraform/ip_cache  # Path to the directory you want to cache
                 key: ec2-ip-address
     
             - name: Store IP in cache

@@ -150,33 +150,40 @@ jobs:
             run:
                 working-directory: ./terraform
         steps:
-            - name: Checkout Code
-              uses: actions/checkout@v4
-              
-            - name: Download instance IP artifact
-              uses: actions/download-artifact@v4
-              with:
-                name: instance-ip
-            - name: Use instance IP in another job
-              run: |
-                cat instance_ip.txt
-                # Your logic to use the file data
-          
-            - name: Set up SSH key
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
-                # Ensure SSH connections to GitHub don't prompt for confirmation
-                ssh-keyscan github.com >> ~/.ssh/known_hosts
-                
-            - name: Configure Git
-              run: |
-                git config --global user.name "Dzeriskk5"
-                git config --global user.email "dzeriskk@gmail.com"
-                
-            - name: Commit and push changes
-              run: |
-                git add instance_ip.txt
-                git commit -m "Update instance IP"
-                git push git@github.com:Dzeriskk5/Galutinis.git HEAD:main
+          - name: Checkout Code
+            uses: actions/checkout@v4
+    
+          - name: Download instance IP artifact
+            uses: actions/download-artifact@v4
+            with:
+              name: instance-ip
+    
+          - name: Move instance IP to /terraform directory
+            run: |
+              # Move the downloaded instance_ip.txt to ./terraform
+              mv instance_ip.txt ./terraform/instance_ip.txt
+              echo "Moved instance_ip.txt to ./terraform"
+    
+          - name: Use instance IP in another job
+            run: |
+              cat ./terraform/instance_ip.txt
+              # Your logic to use the file data
+    
+          - name: Set up SSH key
+            run: |
+              mkdir -p ~/.ssh
+              echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+              # Ensure SSH connections to GitHub don't prompt for confirmation
+              ssh-keyscan github.com >> ~/.ssh/known_hosts
+    
+          - name: Configure Git
+            run: |
+              git config --global user.name "Dzeriskk5"
+              git config --global user.email "dzeriskk@gmail.com"
+    
+          - name: Commit and push changes
+            run: |
+              git add ./terraform/instance_ip.txt
+              git commit -m "Update instance IP"
+              git push git@github.com:Dzeriskk5/Galutinis.git HEAD:main

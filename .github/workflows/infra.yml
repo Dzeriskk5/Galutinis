@@ -158,11 +158,30 @@ jobs:
             with:
               name: instance-ip
     
+          - name: List files in current directory
+            run: |
+              # List the contents of the current directory to see where the file is
+              echo "Contents of current directory:"
+              ls -l
+        
+          - name: Extract the downloaded artifact if it's a ZIP file
+            run: |
+              # If the artifact is a ZIP file, extract it
+              if [ -f instance-ip.zip ]; then
+                unzip instance-ip.zip -d ./artifact-folder
+                echo "Artifact extracted to ./artifact-folder"
+              fi
+        
           - name: Move instance IP to /terraform directory
             run: |
-              # Move the downloaded instance_ip.txt to ./terraform
-              mv instance_ip.txt ./terraform/instance_ip.txt
-              echo "Moved instance_ip.txt to ./terraform"
+              # Check if the file exists after extraction and move it
+              if [ -f ./artifact-folder/instance_ip.txt ]; then
+                mv ./artifact-folder/instance_ip.txt ./terraform/instance_ip.txt
+                echo "Moved instance_ip.txt to ./terraform"
+              else
+                echo "Error: instance_ip.txt not found in the extracted folder."
+                exit 1
+              fi
     
           - name: Use instance IP in another job
             run: |

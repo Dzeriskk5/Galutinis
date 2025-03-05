@@ -20,6 +20,7 @@ on:
                 options:
                     - plan/apply
                     - destroy
+                    - test
 jobs:
     terraform:
         name: Terraform plan/apply/destroy
@@ -142,6 +143,11 @@ jobs:
                 path: ./terraform/instance_ip.txt
                 overwrite: true
                 include-hidden-files: true
+            - name: Save IP to output
+              run: |
+                # Set the output so that the next job can use it
+                echo "::set-output name=instance_ip::$instance_ip"
+
     IP:
         name: Another Job to Use update IP  
         runs-on: ubuntu-latest
@@ -152,96 +158,12 @@ jobs:
         steps:
           - name: Checkout Code
             uses: actions/checkout@v4
+
+          - name: Use the instance IP
+            run: |
+              # Access the instance IP passed from the terraform job
+              instance_ip="${{ needs.terraform.outputs.instance_ip }}"
+              echo "The instance IP passed from terraform is: $instance_ip"
     
-          - name: Download instance IP artifact
-            uses: actions/download-artifact@v4
-            with:
-              name: instance-ip
-          - name: List files in runner
-            run: |
-              # List the contents of the current directory to see where the file is
-              echo "Contents of /home/runner/work/Galutinis/Galutinis/:"
-              ls -l /home/runner/work/Galutinis/Galutinis/
-              echo "Contents of /home/runner/work/Galutinis/Galutinis/terraform/:"
-              ls -l /home/runner/work/Galutinis/Galutinis/terraform/
-              
-          - name: List files in current directory
-            run: |
-              # List the contents of the current directory to see where the file is
-              echo "Contents of current directory:"
-              ls -l
-              
-          - name: Move instance IP ZIP/txt to /terraform directory
-            run: |
-              if [ -f /home/runner/work/Galutinis/Galutinis/instance-ip.zip ]; then
-                mv /home/runner/work/Galutinis/Galutinis/instance-ip.zip ./terraform/instance-ip.zip
-                echo "Moved instance-ip.zip to ./terraform"
-              else
-                echo "Error: instance_ip.zip not found in /home/runner/work/Galutinis/Galutinis/instance-ip.zip."
-              fi
-              if [ -f /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.zip ]; then
-                mv /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.zip ./terraform/instance-ip.zip
-                echo "Moved instance-ip.zip to ./terraform"
-              else
-                echo "Error: instance_ip.zip not found in /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.zip."
-              fi
-              if [ -f /home/runner/work/Galutinis/Galutinis/instance-ip.txt ]; then
-                mv /home/runner/work/Galutinis/Galutinis/instance-ip.zip ./terraform/instance-ip.txt
-                echo "Moved instance-ip.txt to ./terraform"
-              else
-                echo "Error: instance_ip.zip not found in /home/runner/work/Galutinis/Galutinis/instance-ip.txt."
-              fi
-              if [ -f /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.txt ]; then
-                mv /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.txt ./terraform/instance-ip.txt
-                echo "Moved instance-ip.zip to ./terraform"
-              else
-                echo "Error: instance_ip.txt not found in /home/runner/work/Galutinis/Galutinis/terraform/instance-ip.txt."
-              fi
-              
-          - name: List files in current directory
-            run: |
-              # List the contents of the current directory to see where the file is
-              echo "Contents of current directory:"
-              ls -l
-        
-          - name: Extract the downloaded artifact if it's a ZIP file
-            run: |
-              # If the artifact is a ZIP file, extract it
-              if [ -f instance-ip.zip ]; then
-                unzip instance-ip.zip -d ./artifact-folder
-                echo "Artifact extracted to ./artifact-folder"
-              fi
-        
-          - name: Move instance IP to /terraform directory
-            run: |
-              # Check if the file exists after extraction and move it
-              if [ -f ./artifact-folder/instance_ip.txt ]; then
-                mv ./artifact-folder/instance_ip.txt ./terraform/instance_ip.txt
-                echo "Moved instance_ip.txt to ./terraform"
-              else
-                echo "Error: instance_ip.txt not found in the extracted folder."
-                exit 1
-              fi
-    
-          - name: Use instance IP in another job
-            run: |
-              cat ./terraform/instance_ip.txt
-    
-          - name: Set up SSH key
-            run: |
-              mkdir -p ~/.ssh
-              echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-              chmod 600 ~/.ssh/id_rsa
-              # Ensure SSH connections to GitHub don't prompt for confirmation
-              ssh-keyscan github.com >> ~/.ssh/known_hosts
-    
-          - name: Configure Git
-            run: |
-              git config --global user.name "Dzeriskk5"
-              git config --global user.email "dzeriskk@gmail.com"
-    
-          - name: Commit and push changes
-            run: |
-              git add ./terraform/instance_ip.txt
-              git commit -m "Update instance IP"
-              git push git@github.com:Dzeriskk5/Galutinis.git HEAD:main
+
+

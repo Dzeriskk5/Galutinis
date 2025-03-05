@@ -1,12 +1,15 @@
 name: Upload files
 
 on:
-    workflow_dispatch:
-        inputs:
-            ip:
-                type: string
-                description: Enter the IP
-                default: SlaptasIPAdresas
+  push:
+    paths:
+      - 'root/WorkingDir/**'
+  workflow_dispatch:
+    inputs:
+      ip:
+        type: string
+        description: Enter the IP
+        default: SlaptasIPAdresas
 jobs:
 
     Update-Files:

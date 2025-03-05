@@ -20,11 +20,18 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: terraform/ip_cache
-                key: ec2-ip-address
+                key: ec2-ip-address`
                 restore-keys: ec2-ip-address
 
             - name: Show Cached IP Address
-              run: cat terraform/ip_cache/ec2_ip.txt
+              run: |
+                cat terraform/ip_cache/ec2_ip.txt
+                ls -la terraform/ip_cache
+                file terraform/ip_cache/ec2_ip.txt
+                chmod +r terraform/ip_cache/ec2_ip.txt
+                cat terraform/ip_cache/ec2_ip.txt
+                ls -la terraform/ip_cache
+                file terraform/ip_cache/ec2_ip.txt
               
             - name: Create SSH directory
               run: mkdir -p ~/.ssh

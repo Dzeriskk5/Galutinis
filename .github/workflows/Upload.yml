@@ -18,9 +18,6 @@ jobs:
         #Checkout code so that the palybook is accessible
             - name: Checkout code
               uses: actions/checkout@v4
-              
-            - name: Create SSH directory
-              run: mkdir -p ~/.ssh
 
             - name: Restore EC2 IP Address
               uses: actions/cache@v3
@@ -31,6 +28,9 @@ jobs:
 
             - name: Show Cached IP Address
               run: cat ip_cache/ec2_ip.txt
+              
+            - name: Create SSH directory
+              run: mkdir -p ~/.ssh
 
             - name: Add host to known_hosts
               run: ssh-keyscan -H ${{ github.event.inputs.ip }} >> ~/.ssh/known_hosts

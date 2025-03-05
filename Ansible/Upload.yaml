@@ -4,19 +4,21 @@
   become: true
 
   tasks:       
-    - name: Upload files to VM
+    - name: Upload main.py
       ansible.builtin.copy:
         src: ../WorkingDir/main.py
         dest: /home/ubuntu/api_app/
         owner: ubuntu
         group: ubuntu
         mode: '0755'
+    - name: Upload Dockerfile
       ansible.builtin.copy:
         src: ../WorkingDir/Dockerfile
         dest: /home/ubuntu/api_app/
         owner: ubuntu
         group: ubuntu
         mode: '0755'
+    - name: Upload requirements.txt
       ansible.builtin.copy:
         src: ../WorkingDir/requirements.txt
         dest: /home/ubuntu/api_app/

@@ -71,13 +71,18 @@ jobs:
                   echo "Invalid action: ${{ github.event.inputs.action }}";
                   exit 1;
                 fi
-                # Capture Terraform output without quotes
-                rawinstance_ip=$(terraform output -raw instance_ip)
-        
-                echo "Raw instance IP output: $rawinstance_ip"
-        
-                # Pass raw output to GITHUB_OUTPUT
-                echo "rawinstance_ip=$rawinstance_ip" >> "$GITHUB_OUTPUT"
+            - name: Cache EC2 IP Address
+              uses: actions/cache@v3
+              with:
+                path: ip_cache
+                key: ec2-ip-address
+                restore-keys: ec2-ip-address
+
+            - name: Store IP in cache
+              run: |
+                # Ensure the directory exists
+                mkdir -p ip_cache
+                echo "$rawinstance_ip" > ip_cache/ec2_ip.txt
                 
 
             - name: Delete S3 bucket and DynamoDB table (if destroy)
@@ -115,71 +120,7 @@ jobs:
                 # Trinam lentelę
                 aws dynamodb delete-table --table-name kibirs-tfstate-lock || true
                 
-#            - name: Save instance IP to file
-#              if: ${{ github.event.inputs.action == 'plan/apply' }}
-#              run: |
-#                echo "Current runner directory: $(pwd)"
-#                # Use GITHUB_WORKSPACE to reference the root of the repository and save the file in the terraform directory
-#                echo "Saving instance IP to $GITHUB_WORKSPACE/terraform/instance_ip.txt"
-#                #instance_ip=$(terraform output instance_ip | tr -d '"' | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1)
-#                #instance_ip=$(terraform output instance_ip | sed -E 's/^"//; s/"$//')
 
-#                echo "Instance IP: $instance_ip"
-                
-#                # Define the absolute path
-#                #file_path="${GITHUB_WORKSPACE}/terraform/instance_ip.txt"
-                    
-#                # Create the terraform directory if it doesn't exist
-#                #mkdir -p "$(dirname "$file_path")"
-                    
-#                # Write the instance IP to the file
-#                #echo "$instance_ip" > "$file_path"
-#                #echo "Instance IP saved to: $file_path"
-                
-#            - name: Check if instance IP file exists
-#              run: |
-#                if [ -f "${GITHUB_WORKSPACE}/terraform/instance_ip.txt" ]; then
-#                  echo "File exists."
-#                else
-#                  echo "File does not exist."
-#                  exit 1
-#                fi
-                
-#            - name: Upload instance IP as artifact
-#              uses: actions/upload-artifact@v4
-#              with:
-#                name: instance-ip
-#                path: ./terraform/instance_ip.txt
-#                overwrite: true
-#                include-hidden-files: true
-#                
-#            - name: Save IP to output
-#              run: |
-#                # Set the output so that the next job can use it
-#                echo "Setting GitHub output: instance_ip=$instance_ip"
-#                echo "instance_ip=$instance_ip" >> $GITHUB_OUTPUT
-#                
-#            - name: Debug Terraform Output
-#              run: |
-#                echo "Raw Terraform output:"
-#                terraform output instance_ip
-
-
-    IP:
-        name: Another Job to Use update IP  
-        runs-on: ubuntu-latest
-        needs: terraform
-        defaults:
-            run:
-                working-directory: ./terraform
-        steps:
-          - name: Checkout Code
-            uses: actions/checkout@v4
-
-          - name: Use the instance IP
-            run: |
-              instance_ip="${{ needs.terraform.outputs.instance_ip }}"
-              echo "The instance IP passed from terraform is: $instance_ip"
     
 
 

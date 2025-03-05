@@ -1,68 +1,61 @@
 name: Setup Docker on the VM with Ansible
 
 on:
-    workflow_dispatch:
-        inputs:
-            environment:
-                type: choice
-                description: Pasirinkimas
-                options:
-                    - dev
-                default: dev
-            ip:
-                type: string
-                description: Enter the IP
-                default: SlaptasIPAdresas
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment (Pasirinkimas)
+        options:
+          - dev
+        default: dev
+
 jobs:
+  install-docker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Ansible
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    install-docker:
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-              working-directory: ./Ansible
-        steps:
-        #Checkout code so that the palybook is accessible
-            - name: Checkout code
-              uses: actions/checkout@v3
+      - name: Read EC2 IP Address
+        id: read_ip
+        run: |
+          IP=$(cat terraform/ip_cache/ec2_ip.txt)
+          echo "IP=$IP" >> $GITHUB_OUTPUT
 
-            - name: Read EC2 IP Address
-              id: read_ip
-              run: |
-                IP=$(cat terraform/ip_cache/ec2_ip.txt)
-                echo "IP=$IP" >> $GITHUB_OUTPUT # Set output variable
-            - name: Use the IP Address
-              run: |
-                echo "The EC2 IP address is: ${{ steps.read_ip.outputs.IP }}"
-    
-            - name: Set IP as environment variable.
-              run: |
-                echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
+      - name: Set IP as environment variable.
+        run: |
+          echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
 
-            - name: Create SSH directory
-              run: mkdir -p ~/.ssh
+      - name: Create SSH directory and set permissions
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
 
-            - name: Add host to known_hosts
-              run: ssh-keyscan -H ${{ EC2_IP }} >> ~/.ssh/known_hosts
+      - name: Add host to known_hosts
+        run: ssh-keyscan ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
 
-            - name: Check and Install Ansible
-              run: |
-                if ! command -v ansible &> /dev/null; then
-                  echo "Ansible not found. Installing..."
-                  sudo apt-get update && sudo apt-get install -y ansible
-                else
-                  echo "Ansible is already installed."
-                fi
-            - name: Ensure everything is up to date
-              run: |
-                sudo dpkg --configure -a
-                sudo apt-get update --fix-missing
-                sudo apt-get -f install 
+      - name: Check and Install Ansible
+        run: |
+          if ! command -v ansible &> /dev/null; then
+            echo "Ansible not found. Installing..."
+            sudo apt-get update && sudo apt-get install -y ansible
+          else
+            echo "Ansible is already installed."
+          fi
+      - name: Ensure everything is up to date
+        run: |
+          sudo dpkg --configure -a
+          sudo apt-get update --fix-missing
+          sudo apt-get -f install
 
-            - name: Setup SSH key for connection to AWS VM
-              run: |
-                mkdir -p ~/.ssh
-                echo "${{secrets.AWS_SSH_KEY}}" > ~/.ssh/id_rsa
-                chmod 600 ~/.ssh/id_rsa
+      - name: Setup SSH key for connection to AWS VM
+        run: |
+          echo "${{secrets.AWS_SSH_KEY}}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-            - name: Run ansible playbook to install Docker
-              run: ansible-playbook -u ubuntu -i ${{ EC2_IP }}, --private-key ~/.ssh/id_rsa Docker.yaml
+      - name: Run ansible playbook to install Docker
+        run: ansible-playbook -u ubuntu -i ${{ env.EC2_IP }}, --private-key ~/.ssh/id_rsa Docker.yaml || exit 1

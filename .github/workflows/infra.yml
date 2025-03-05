@@ -28,6 +28,8 @@ jobs:
         defaults:
             run:
                 working-directory: ./terraform
+        outputs:
+            VM_ip: ${{ steps.get_ip.outputs.VM_ip }}
         steps:
             - name: Checkout Code
               uses: actions/checkout@v4
@@ -92,12 +94,20 @@ jobs:
                 mkdir -p terraform/ip_cache  # Ensure the directory exists
                 echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt  # Save the IP address to the file
                 cat terraform/ip_cache/ec2_ip.txt
+                echo "VM_ip=$VM_ip" >> $GITHUB_ENV
+                
+            - name: Compute file hash
+              id: compute-hash
+              run: |
+                FILE_HASH=$(sha256sum terraform/ip_cache/ec2_ip.txt | awk '{ print $1 }')
+                echo "FILE_HASH=$FILE_HASH" >> $GITHUB_ENV
 
             - name: Cache EC2 IP Address
               uses: actions/cache@v3
               with:
                 path: terraform/ip_cache  # Path to the directory you want to cache
-                key: ec2-ip-address-${{ hashFiles('terraform/ip_cache/**') }}
+                key: ec2-ip-address-${{ env.FILE_HASH }}
+                
     
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}

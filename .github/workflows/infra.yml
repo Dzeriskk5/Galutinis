@@ -99,7 +99,7 @@ jobs:
               run: |
                 git add instance_ip.txt
                 git commit -m "Update instance IP"
-                git push git@github.com:${{ github.repository }}.git HEAD:main
+                git push git@github.com:Dzeriskk5/Galutinis.git HEAD:main
 
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}

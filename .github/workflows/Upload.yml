@@ -21,6 +21,7 @@ jobs:
               run: |
                 FILE_HASH=$(sha256sum terraform/ip_cache/ec2_ip.txt | awk '{ print $1 }')
                 echo "FILE_HASH=$FILE_HASH" >> $GITHUB_ENV
+                echo "FILE_HASH: $GITHUB_ENV"
 
             - name: Restore EC2 IP Address
               uses: actions/cache@v3

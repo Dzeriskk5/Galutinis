@@ -95,13 +95,13 @@ jobs:
                 echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt  # Save the IP address to the file
                 cat terraform/ip_cache/ec2_ip.txt
               env:
-                VM_ip: ${{ steps.get_ip.outputs.instance_ip }}  # Make sure you're passing the correct variable
+                VM_ip: ${{ steps.get_ip.outputs.VM_ip }}  # Make sure you're passing the correct variable
             
             - name: Cache EC2 IP Address
               uses: actions/cache@v3
               with:
                 path: terraform/ip_cache  # Path to the directory you want to cache
-                key: ec2-ip-address
+                key: ${{ hashFiles('terraform/ip_cache/ec2_ip.txt') }}
     
             - name: Store IP in cache
               run: |

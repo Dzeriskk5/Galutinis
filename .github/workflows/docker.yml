@@ -47,7 +47,7 @@ jobs:
 
             - name: Setup SSH key for connection to AWS VM
               run: |
-                mkdir -p ~/.ssh
+#Jau yra auksciau                mkdir -p ~/.ssh
                 echo "${{secrets.AWS_SSH_KEY}}" > ~/.ssh/id_rsa
                 chmod 600 ~/.ssh/id_rsa
 

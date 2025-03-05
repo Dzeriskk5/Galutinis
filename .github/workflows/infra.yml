@@ -127,6 +127,7 @@ jobs:
                 # Write the instance IP to the file
                 echo "$instance_ip" > "$file_path"
                 echo "Instance IP saved to: $file_path"
+                
             - name: Check if instance IP file exists
               run: |
                 if [ -f "${GITHUB_WORKSPACE}/terraform/instance_ip.txt" ]; then
@@ -143,10 +144,18 @@ jobs:
                 path: ./terraform/instance_ip.txt
                 overwrite: true
                 include-hidden-files: true
+                
             - name: Save IP to output
               run: |
                 # Set the output so that the next job can use it
+                echo "Setting GitHub output: instance_ip=$instance_ip"
                 echo "instance_ip=$instance_ip" >> $GITHUB_OUTPUT
+                
+            - name: Debug Terraform Output
+              run: |
+                echo "Raw Terraform output:"
+                terraform output instance_ip
+
 
     IP:
         name: Another Job to Use update IP  

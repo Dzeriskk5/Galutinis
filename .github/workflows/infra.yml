@@ -97,15 +97,8 @@ jobs:
               uses: actions/cache@v3
               with:
                 path: terraform/ip_cache  # Path to the directory you want to cache
-                key: ec2-ip-address-${{ hashFiles('terraform/ip_cache/ec2_ip.txt') }}
+                key: ec2-ip-address-${{ hashFiles('terraform/ip_cache/**') }}
     
-            - name: Store IP in cache
-              run: |
-                # Ensure the directory exists
-                mkdir -p terraform/ip_cache
-                echo "$VM_ip" > terraform/ip_cache/ec2_ip.txt
-                cat terraform/ip_cache/ec2_ip.txt
-
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}
               run: |

@@ -1,0 +1,25 @@
+---
+- name: Upload Files inside VM
+  hosts: all
+  become: true
+
+  tasks:       
+    - name: Copy files to vm
+      ansible.builtin.copy:
+        src: ../WorkingDir/main.py
+        dest: /home/ubuntu/api_app/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      ansible.builtin.copy:
+        src: ../WorkingDir/Dockerfile
+        dest: /home/ubuntu/api_app/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      ansible.builtin.copy:
+        src: ../WorkingDir/requirements.txt
+        dest: /home/ubuntu/api_app/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'

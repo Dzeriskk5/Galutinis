@@ -118,7 +118,7 @@ jobs:
                 echo "Instance IP: $instance_ip"
                 
                 # Save the IP as an artifact
-                echo "$instance_ip" | tee instance_ip.txt
+                echo "$instance_ip" > instance_ip.txt
                 
             - name: Upload instance IP as artifact
               uses: actions/upload-artifact@v4

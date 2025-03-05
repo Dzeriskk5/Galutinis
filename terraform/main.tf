@@ -100,4 +100,5 @@ resource "aws_eip" "ip" {
 output "instance_ip" {
     description = "Ze IP"
     value       = aws_instance.main-vm.public_ip
+    sensitive = false
 }

@@ -15,12 +15,18 @@ jobs:
         #Checkout code so that the palybook is accessible
             - name: Checkout code
               uses: actions/checkout@v4
+              
+            - name: Compute file hash
+              id: compute-hash
+              run: |
+                FILE_HASH=$(sha256sum terraform/ip_cache/ec2_ip.txt | awk '{ print $1 }')
+                echo "FILE_HASH=$FILE_HASH" >> $GITHUB_ENV
 
             - name: Restore EC2 IP Address
               uses: actions/cache@v3
               with:
                 path: terraform/ip_cache
-                key: ec2-ip-address-${{ hashFiles('terraform/ip_cache/**') }}
+                key: ec2-ip-address-${{ env.FILE_HASH }}
                 restore-keys: |
                   ec2-ip-address-
 

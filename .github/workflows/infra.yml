@@ -71,6 +71,16 @@ jobs:
                   exit 1;
                 fi
                 terraform output instance_ip
+                
+            - name: Save instance IP to file
+              if: ${{ github.event.inputs.action == 'plan/apply' }}
+              run: |
+                # Run terraform output and save it to instance_ip.txt
+                terraform output instance_ip | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n 1 > instance_ip.txt
+                
+                # Output the saved file location to confirm
+                echo "Instance IP saved to: instance_ip.txt"
+                cat instance_ip.txt  # Check if file exists and has content
 
             - name: Delete S3 bucket and DynamoDB table (if destroy)
               if: ${{ github.event.inputs.action == 'destroy' }}

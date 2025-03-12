@@ -3,7 +3,65 @@
   hosts: localhost
   become: true
   tasks:
-        
+
+    # Debugging Task: Show the current user
+    - name: Show current user
+      ansible.builtin.command: whoami
+      register: result_user
+    - name: Print current user
+      ansible.builtin.debug:
+        var: result_user.stdout
+
+    # Debugging Task: Check if Docker is installed and running
+    - name: Check Docker version
+      ansible.builtin.command: docker --version
+      register: result_docker_version
+      ignore_errors: yes
+    - name: Print Docker version
+      ansible.builtin.debug:
+        var: result_docker_version.stdout
+
+    - name: Check Docker status
+      ansible.builtin.service_facts:
+      register: docker_services
+
+    - name: Show Docker service status
+      ansible.builtin.debug:
+        var: docker_services
+
+    # Ensure the ubuntu user is added to the docker group
+    - name: Add ubuntu user to the docker group
+      ansible.builtin.user:
+        name: ubuntu
+        group: docker
+        append: yes
+
+    # Debugging Task: Ensure docker group membership for ubuntu user
+    - name: Check ubuntu user group memberships
+      ansible.builtin.shell: id -nG ubuntu
+      register: result_user_groups
+    - name: Print ubuntu user groups
+      ansible.builtin.debug:
+        var: result_user_groups.stdout
+
+    # Debugging Task: Verify the directory contents before building the image
+    - name: List files in the application directory
+      ansible.builtin.shell: ls -l /home/ubuntu/api_app
+      register: result_directory
+    - name: Print directory contents
+      ansible.builtin.debug:
+        var: result_directory.stdout
+
+    # Debugging Task: Verify the Dockerfile exists
+    - name: Check if Dockerfile exists
+      ansible.builtin.stat:
+        path: /home/ubuntu/api_app/Dockerfile
+      register: result_dockerfile_exists
+    - name: Print Dockerfile existence
+      ansible.builtin.debug:
+        var: result_dockerfile_exists.stat.exists
+
+    # Build Docker image
     - name: Build Docker image
       community.docker.docker_image:
         name: my_python_app:latest
@@ -11,7 +69,14 @@
           path: /home/ubuntu/api_app
           dockerfile: Dockerfile
           pull: yes
+      register: build_result
+      ignore_errors: yes
 
+    - name: Print Build Docker result
+      ansible.builtin.debug:
+        var: build_result
+
+    # Run Docker container
     - name: Run Docker container
       community.docker.docker_container:
         name: my_python_app_container
@@ -19,3 +84,9 @@
         state: started
         ports:
           - "8000:8000"
+      register: container_result
+      ignore_errors: yes
+
+    - name: Print Run Docker container result
+      ansible.builtin.debug:
+        var: container_result

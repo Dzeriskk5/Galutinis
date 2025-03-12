@@ -14,7 +14,7 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Configure Nginx (optional: add your custom nginx configuration)
-COPY /home/api_app/nginx.conf /etc/nginx/nginx.conf  # You can add a custom nginx configuration file
+COPY /home/api_app/nginx.conf /etc/nginx/nginx.conf
 
 # Expose the ports for both Python and Nginx
 EXPOSE 8000 80

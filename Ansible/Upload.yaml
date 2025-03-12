@@ -35,3 +35,33 @@
         owner: ubuntu
         group: docker
         mode: '0755'
+        
+    # Build Docker image
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: my_python_app:latest
+        build:
+          path: /home/ubuntu/api_app
+          dockerfile: Dockerfile
+          pull: yes
+      register: build_result
+      ignore_errors: yes
+
+    - name: Print Build Docker result
+      ansible.builtin.debug:
+        var: build_result
+
+    # Run Docker container
+    - name: Run Docker container
+      community.docker.docker_container:
+        name: my_python_app_container
+        image: my_python_app:latest
+        state: started
+        ports:
+          - "8000:8000"
+      register: container_result
+      ignore_errors: yes
+
+    - name: Print Run Docker container result
+      ansible.builtin.debug:
+        var: container_result

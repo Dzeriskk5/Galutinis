@@ -73,11 +73,11 @@
     - name: Build Docker image
       community.docker.docker_image:
         name: my_python_app:latest
+        source: build           # Specify that we are building the image
         build:
           path: /home/ubuntu/api_app
           dockerfile: Dockerfile
           pull: yes
-        source: /home/ubuntu/api_app     # Add the 'source' parameter here
       register: build_result
       ignore_errors: yes
 

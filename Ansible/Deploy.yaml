@@ -1,0 +1,20 @@
+---
+- name: Deploy Docker Application
+  hosts: localhost
+  become: true
+  tasks:
+
+    - name: Build Docker image
+      community.docker.docker_image:
+        name: my_python_app:latest
+        build:
+          path: /home/ubuntu/api_app
+          pull: yes
+
+    - name: Run Docker container
+      community.docker.docker_container:
+        name: my_python_app_container
+        image: my_python_app:latest
+        state: started
+        ports:
+          - "8000:8000"

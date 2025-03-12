@@ -1,11 +1,27 @@
-from flask import Flask, jsonify
+import random
+import shutil
+import time
+import os
 
-app = Flask(__name__)
+def matrix_effect():
+    columns, rows = shutil.get_terminal_size()
+    characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()"
+    drops = [0] * columns
 
-@app.route('/')
-def hello():
-    return jsonify({"message": "Hello from Docker!"})
+    while True:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        for i in range(rows):
+            line = ""
+            for j in range(columns):
+                if random.random() > 0.975:
+                    drops[j] = 0
+                if drops[j] == 0:
+                    line += random.choice(characters)
+                else:
+                    line += " "
+                drops[j] += 1
+            print(f"\033[32m{line}\033[0m")
+        time.sleep(0.1)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
-print("asd")
+if __name__ == "__main__":
+    matrix_effect()

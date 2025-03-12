@@ -1,6 +1,6 @@
 ---
 - name: Deploy Docker Application
-  hosts: localhost
+  hosts: all
   become: true
   tasks:
 

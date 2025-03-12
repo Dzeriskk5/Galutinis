@@ -9,6 +9,7 @@
         name: my_python_app:latest
         build:
           path: /home/ubuntu/api_app
+          dockerfile: /home/ubuntu/api_app/Dockerfile
           pull: yes
 
     - name: Run Docker container

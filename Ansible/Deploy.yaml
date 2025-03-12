@@ -9,6 +9,7 @@
     - name: Build Docker image
       community.docker.docker_image:
         name: my_python_app:latest
+        source: build
         build:
           path: /home/ubuntu/api_app
           dockerfile: Dockerfile

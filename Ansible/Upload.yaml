@@ -35,6 +35,13 @@
         owner: ubuntu
         group: docker
         mode: '0755'
+
+      # Ensure the ubuntu user is added to the docker group
+    - name: Add ubuntu user to the docker group
+      ansible.builtin.user:
+        name: ubuntu
+        group: docker
+        append: yes
         
     # Build Docker image
     - name: Build Docker image

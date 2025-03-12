@@ -29,6 +29,7 @@
         state: started
         ports:
           - "8000:8000"
+          - "80:80"
       register: container_result
       ignore_errors: yes
 

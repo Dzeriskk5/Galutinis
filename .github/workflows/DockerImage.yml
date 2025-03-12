@@ -1,0 +1,34 @@
+name: Deploy Docker App with Ansible
+
+on:
+  push:
+    branches:
+      - main  # Change this to your desired branch
+  workflow_dispatch:  # Allows manual triggering
+
+env:
+  ANSIBLE_HOST: ${{ secrets.ANSIBLE_HOST }}  # EC2 Public IP
+  ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}  # SSH User (e.g., ubuntu, ec2-user)
+  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Private key for SSH access
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up SSH Connection
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "$ANSIBLE_HOST" >> ~/.ssh/known_hosts
+
+      - name: Install Ansible
+        run: sudo apt update && sudo apt install -y ansible
+
+      - name: Run Ansible Playbook
+        run: |
+          ansible-playbook -i "$ANSIBLE_HOST," -u "$ANSIBLE_USER" --private-key ~/.ssh/id_rsa deploy_docker_app.yml

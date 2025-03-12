@@ -43,6 +43,14 @@
         group: docker
         append: yes
         
+    # Debug: Show the current directory contents
+    - name: List files in the application directory
+      ansible.builtin.shell: ls -l /home/ubuntu/api_app
+      register: result_directory
+    - name: Print directory contents
+      ansible.builtin.debug:
+        var: result_directory.stdout
+        
     # Build Docker image
     - name: Build Docker image
       community.docker.docker_image:

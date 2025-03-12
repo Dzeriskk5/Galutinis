@@ -1,8 +1,15 @@
-# Use a base Python image
-FROM python:3.9-slim-buster
+# Use an Alpine base image
+FROM alpine:3.18
 
-# Install Nginx
-RUN apt-get update && apt-get install -y nginx && apt-get clean
+# Install Python, pip, Nginx, and dependencies
+RUN apk update && \
+    apk add --no-cache \
+    python3 \
+    py3-pip \
+    nginx \
+    bash && \
+    python3 -m ensurepip && \
+    pip3 install --no-cache --upgrade pip
 
 # Set the working directory in the container
 WORKDIR /app
@@ -13,11 +20,11 @@ COPY . /app
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Configure Nginx (optional: add your custom nginx configuration)
+# Copy Nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose the ports for both Python and Nginx
 EXPOSE 8000 80
 
-# Start both Nginx and the Python application
+# Start Nginx and Python application
 CMD service nginx start && python main.py

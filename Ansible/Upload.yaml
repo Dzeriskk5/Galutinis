@@ -9,7 +9,7 @@
         path: /home/ubuntu/api_app
         state: directory
         owner: ubuntu
-        group: ubuntu
+        group: docker
         mode: '0755'
 
     - name: Upload main.py
@@ -17,7 +17,7 @@
         src: ../WorkingDir/main.py
         dest: /home/ubuntu/api_app/
         owner: ubuntu
-        group: ubuntu
+        group: docker
         mode: '0755'
 
     - name: Upload Dockerfile
@@ -25,7 +25,7 @@
         src: ../WorkingDir/Dockerfile
         dest: /home/ubuntu/api_app/
         owner: ubuntu
-        group: ubuntu
+        group: docker
         mode: '0755'
 
     - name: Upload requirements.txt
@@ -33,5 +33,5 @@
         src: ../WorkingDir/requirements.txt
         dest: /home/ubuntu/api_app/
         owner: ubuntu
-        group: ubuntu
+        group: docker
         mode: '0755'

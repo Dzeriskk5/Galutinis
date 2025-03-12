@@ -38,4 +38,4 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
       - name: Run ansible playbook to upload the code
-        run: ansible-playbook -u ubuntu -i ${{ env.EC2_IP }}, --private-key ~/.ssh/id_rsa Ansible/Upload.yaml
+        run: ansible-playbook -u ubuntu -i ${{ env.EC2_IP }}, --private-key ~/.ssh/id_rsa Ansible/Deploy.yaml

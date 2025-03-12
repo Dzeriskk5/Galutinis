@@ -4,6 +4,14 @@
   become: true
   tasks:
 
+    - name: Ensure /home/ubuntu/api_app directory exists
+    ansible.builtin.file:
+      path: /home/ubuntu/api_app
+      state: directory
+      owner: ubuntu
+      group: docker
+      mode: '0755'
+
     # Debugging Task: Show the current user
     - name: Show current user
       ansible.builtin.command: whoami
@@ -69,6 +77,7 @@
           path: /home/ubuntu/api_app
           dockerfile: Dockerfile
           pull: yes
+        source: /home/ubuntu/api_app     # Add the 'source' parameter here
       register: build_result
       ignore_errors: yes
 

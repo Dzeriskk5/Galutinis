@@ -39,7 +39,7 @@
     - name: Upload nginx.conf
       ansible.builtin.copy:
         src: ../WorkingDir/nginx.conf
-        dest: /home/ubuntu/api_app/
-        owner: ubuntu
-        group: docker
-        mode: '0755'
+        dest: /etc/nginx/nginx.conf  # Destination should be inside /etc/nginx/
+        owner: root
+        group: root  # Nginx typically runs as root, so setting owner/group to root is standard
+        mode: '0644'

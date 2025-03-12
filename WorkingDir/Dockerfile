@@ -24,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Expose the ports for both Python and Nginx
-EXPOSE 8000 80
+EXPOSE 80 8000
 
 # Start Nginx and Python application (using direct commands)
 CMD nginx && python main.py

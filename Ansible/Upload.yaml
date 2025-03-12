@@ -36,3 +36,10 @@
         group: docker
         mode: '0755'
 
+    - name: Upload requirements.txt
+      ansible.builtin.copy:
+        src: ../WorkingDir/nginx.conf
+        dest: /home/ubuntu/api_app/
+        owner: ubuntu
+        group: docker
+        mode: '0755'

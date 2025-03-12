@@ -5,11 +5,6 @@ on:
     paths:
       - 'WorkingDir/**'
   workflow_dispatch:
-    inputs:
-      ip:
-        type: string
-        description: Enter the IP
-        default: SlaptasIPAdresas
 jobs:
 
     Update-Files:

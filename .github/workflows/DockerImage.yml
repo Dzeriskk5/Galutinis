@@ -1,15 +1,7 @@
 name: Deploy Docker App with Ansible
 
 on:
-  push:
-    branches:
-      - main  # Change this to your desired branch
   workflow_dispatch:  # Allows manual triggering
-
-env:
-  ANSIBLE_HOST: ${{ secrets.ANSIBLE_HOST }}  # EC2 Public IP
-  ANSIBLE_USER: ${{ secrets.ANSIBLE_USER }}  # SSH User (e.g., ubuntu, ec2-user)
-  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Private key for SSH access
 
 jobs:
   deploy:
@@ -17,18 +9,33 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up SSH Connection
+      - name: Read EC2 IP Address
+        id: read_ip
+        run: |
+          IP=$(cat terraform/ip_cache/ec2_ip.txt)
+          echo "IP=$IP" >> $GITHUB_OUTPUT # Set output variable
+
+      - name: Use the IP Address
+        run: |
+          echo "The EC2 IP address is: ${{ steps.read_ip.outputs.IP }}"
+
+      - name: Set IP as environment variable
+        run: |
+          echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
+
+      - name: Create SSH directory
+        run: mkdir -p ~/.ssh
+
+      - name: Add host to known_hosts
+        run: ssh-keyscan -H ${{ env.EC2_IP }} >> ~/.ssh/known_hosts
+
+      - name: Setup SSH key for connection to AWS VM
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "${{ secrets.AWS_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "$ANSIBLE_HOST" >> ~/.ssh/known_hosts
 
-      - name: Install Ansible
-        run: sudo apt update && sudo apt install -y ansible
-
-      - name: Run Ansible Playbook
-        run: |
-          ansible-playbook -i "$ANSIBLE_HOST," -u "$ANSIBLE_USER" --private-key ~/.ssh/id_rsa deploy_docker_app.yml
+      - name: Run ansible playbook to upload the code
+        run: ansible-playbook -u ubuntu -i ${{ env.EC2_IP }}, --private-key ~/.ssh/id_rsa Ansible/Upload.yaml

@@ -26,5 +26,5 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Expose the ports for both Python and Nginx
 EXPOSE 8000 80
 
-# Start Nginx and Python application
-CMD service nginx start && python main.py
+# Start Nginx and Python application (using direct commands)
+CMD nginx && python main.py

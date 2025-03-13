@@ -2,7 +2,7 @@
     <img src="https://github.com/Dzeriskk5/Galutinis/blob/8ab412987f5a5be9bba93b8b9ea14628f495071b/Other/Matrix.png" width="100%" style="border: 3px solid white; border-radius: 15px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); transition: transform 0.3s ease;">
 </p>
 
-# Matrix Rain Effect with Flask and Socket.IO
+# CI/CD pipeline
 
 This project creates a dynamic Matrix rain effect using Flask. The main goal is to set up a CI/CD pipeline to continuously update the code as changes are made.
 

@@ -1,4 +1,4 @@
-name: Deploy Docker App with Ansible
+name: Deploy Application
 
 on:
   workflow_dispatch:  # Allows manual triggering

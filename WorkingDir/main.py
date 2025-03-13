@@ -1,172 +1,128 @@
-import math
-import os
 import random
 import time
-import shutil
-from flask import Flask, render_template_string
+from flask import Flask
+from flask_socketio import SocketIO
 from threading import Thread
-import typer
 
 # Initializing the Flask app
-app_flask = Flask(__name__)
-
-# Initializing the CLI app
-app_cli = typer.Typer()
+app = Flask(__name__)
+socketio = SocketIO(app)
 
 # Constants for the Matrix effect
-BLANK_CHAR = " "
-CLEAR_CHAR = "\x1b[H"
-STATE_NONE = 0
-STATE_FRONT = 1
-STATE_TAIL = 2
-MIN_LEN = 5
-MAX_LEN = 12
-BODY_CLRS = [
-    "\x1b[38;5;48m",
-    "\x1b[38;5;41m",
-    "\x1b[38;5;35m",
-    "\x1b[38;5;238m",
-]
-FRONT_CLR = "\x1b[38;5;231m"
-TOTAL_CLRS = len(BODY_CLRS)
+CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"
+delay = 0.05  # Faster update interval for smoother movement
 
-matrix_output = ""  # Holds the matrix output as a string
+# Dynamic matrix size
+matrix = []
+MATRIX_WIDTH = 0
+MATRIX_HEIGHT = 0
 
+# Initialize a list to track the position of falling drops
+drops = []
 
-class Matrix(list):
-    def __init__(self, wait: int, glitch_freq: int, drop_freq: int):
-        self.rows = 0
-        self.cols = 0
+def update_matrix():
+    global matrix, MATRIX_WIDTH, MATRIX_HEIGHT, drops
+    while True:
+        # Ensure that MATRIX_WIDTH and MATRIX_HEIGHT are non-zero
+        if MATRIX_WIDTH == 0 or MATRIX_HEIGHT == 0:
+            time.sleep(0.1)
+            continue  # Wait until the matrix size is set
 
-        self.wait = 0.06 / (wait / 100)
-        self.glitch_freq = 0.01 / (glitch_freq / 100)
-        self.drop_freq = 0.1 * (drop_freq / 100)
+        # Generate new drops and add trails to them
+        if random.random() < 0.5:  # Increased chance of new drops appearing each cycle (50%)
+            for _ in range(random.randint(5, 10)):  # Randomly create 5 to 10 drops per cycle (increased)
+                col = random.randint(0, MATRIX_WIDTH - 1)
+                trail_length = random.randint(5, 15)  # Random trail length between 5 and 15
+                drops.append({"row": 0, "col": col, "trail": [], "trail_length": trail_length})
 
-    def __str__(self):
-        text = ""
-
-        for (c, s, l) in sum(self[MAX_LEN:], []):
-            if s == STATE_NONE:
-                text += BLANK_CHAR
-            elif s == STATE_FRONT:
-                text += f"{FRONT_CLR}{c}"
+        # Move the drops one step down and update their trails
+        for drop in drops[:]:
+            if drop["row"] < MATRIX_HEIGHT - 1:
+                drop["row"] += 1
+                # Randomize the character for the trail at the current position
+                trail_char = random.choice(CHARS)
+                drop["trail"].append(trail_char)  # Add a random char to the trail
+                if len(drop["trail"]) > drop["trail_length"]:
+                    drop["trail"].pop(0)  # Keep trail length within bounds
             else:
-                text += f"{BODY_CLRS[l]}{c}"
+                drops.remove(drop)  # Remove drop when it reaches the bottom
 
-        return text
+        # Update matrix with the drops and their trails
+        matrix = [[" " for _ in range(MATRIX_WIDTH)] for _ in range(MATRIX_HEIGHT)]
+        for drop in drops:
+            # Update the matrix with each trail segment, ensuring we are within bounds
+            for i, char in enumerate(drop["trail"]):
+                row = drop["row"] - len(drop["trail"]) + i + 1  # Positioning the trail vertically
+                if 0 <= row < MATRIX_HEIGHT and 0 <= drop["col"] < MATRIX_WIDTH:  # Ensure row and col are within bounds
+                    matrix[row][drop["col"]] = char
 
-    def get_prompt_size(self):
-        size = os.get_terminal_size()
-        return size.lines + MAX_LEN, size.columns
-
-    @staticmethod
-    def get_random_char():
-        return chr(random.randint(32, 126))
-
-    def update_cell(self, r: int, c: int, *, char: str = None, state: int = None, length: int = None):
-        if char is not None:
-            self[r][c][0] = char
-
-        if state is not None:
-            self[r][c][1] = state
-
-        if length is not None:
-            self[r][c][2] = length
-
-    def fill(self):
-        self[:] = [
-            [[self.get_random_char(), STATE_NONE, 0] for _ in range(self.cols)]
-            for _ in range(self.rows)
-        ]
-
-    def apply_glitch(self):
-        total = self.cols * self.rows * self.glitch_freq
-
-        for _ in range(int(total)):
-            c = random.randint(0, self.cols - 1)
-            r = random.randint(0, self.rows - 1)
-            self.update_cell(r, c, char=self.get_random_char())
-
-    def drop_col(self, col: int):
-        dropped = self[self.rows - 1][col] == STATE_FRONT
-
-        for r in reversed(range(self.rows)):
-            _, state, length = self[r][col]
-
-            if state == STATE_NONE:
-                continue
-
-            if r != self.rows - 1:
-                self.update_cell(r + 1, col, state=state, length=length)
-
-            self.update_cell(r, col, state=STATE_NONE, length=0)
-
-        return dropped
-
-    def add_drop(self, row: int, col: int, length: int):
-        for i in reversed(range(length)):
-            r = row + (length - i)
-
-            if i == 0:
-                self.update_cell(r, col, state=STATE_FRONT, length=length)
-            else:
-                l = math.ceil((TOTAL_CLRS - 1) * i / length)
-                self.update_cell(r, col, state=STATE_TAIL, length=l)
-
-    def screen_check(self):
-        if (p := self.get_prompt_size()) != (self.rows, self.cols):
-            self.rows, self.cols = p
-            self.fill()
-
-    def update(self):
-        dropped = sum(self.drop_col(c) for c in range(self.cols))
-
-        total = self.cols * self.rows * self.drop_freq
-        missing = math.ceil((total - dropped) / self.cols)
-
-        for _ in range(missing):
-            col = random.randint(0, self.cols - 1)
-            length = random.randint(MIN_LEN, MAX_LEN)
-            self.add_drop(0, col, length)
-
-    def start(self):
-        global matrix_output
-        while True:
-            matrix_output = self.__str__()
-            self.screen_check()
-            self.apply_glitch()
-            self.update()
-            time.sleep(self.wait)
+        # Convert matrix to string and send to the frontend
+        matrix_output = "\n".join("".join(row) for row in matrix)
+        socketio.emit("update_matrix", {"matrix": matrix_output})
+        time.sleep(delay)
 
 
-@app_flask.route("/")
+@app.route("/")
 def index():
-    return render_template_string("<pre>{{ matrix_output }}</pre>", matrix_output=matrix_output)
+    return '''
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Matrix Rain</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+        <script>
+            function adjustMatrixSize() {
+                var width = Math.floor(window.innerWidth / 10);
+                var height = Math.floor(window.innerHeight / 20);
+                fetch(`/set_size?width=${width}&height=${height}`);
+            }
+            window.addEventListener("resize", adjustMatrixSize);
+            document.addEventListener("DOMContentLoaded", function() {
+                adjustMatrixSize();
+                var socket = io();
+                socket.on("update_matrix", function(data) {
+                    document.getElementById("matrix").innerText = data.matrix;
+                });
+            });
+        </script>
+        <style>
+            body { background-color: black; color: green; font-family: monospace; white-space: pre; margin: 0; overflow: hidden; }
+            pre { font-size: 18px; line-height: 20px; }
+        </style>
+    </head>
+    <body>
+        <pre id="matrix"></pre>
+    </body>
+    </html>
+    '''
 
 
-@app_cli.command()
-def start(
-    speed: int = typer.Option(100, "--speed", "-s", help="Percentage of normal rain speed"),
-    glitches: int = typer.Option(100, "--glitches", "-g", help="Percentage of normal glitch amount"),
-    frequency: int = typer.Option(100, "--frequency", "-f", help="Percentage of normal drop frequency"),
-):
-    """Start the matrix rain in CLI"""
-    for arg in (speed, glitches, frequency):
-        if not 0 <= arg <= 1000:
-            raise typer.BadParameter("must be between 1 and 1000")
+@app.route("/set_size")
+def set_size():
+    global matrix, MATRIX_WIDTH, MATRIX_HEIGHT, drops
+    from flask import request
+    MATRIX_WIDTH = int(request.args.get("width", 60))
+    MATRIX_HEIGHT = int(request.args.get("height", 20))
 
-    matrix = Matrix(speed, glitches, frequency)
-    matrix.start()
+    if MATRIX_WIDTH == 0 or MATRIX_HEIGHT == 0:
+        return "Invalid matrix size", 400  # Return error if the size is zero
+
+    # Reset drops when the size changes
+    drops = []
+
+    # Reinitialize the matrix with the new size
+    matrix = [[" " for _ in range(MATRIX_WIDTH)] for _ in range(MATRIX_HEIGHT)]
+    return "OK"
+
+
+def start_matrix():
+    thread = Thread(target=update_matrix)
+    thread.daemon = True
+    thread.start()
 
 
 if __name__ == "__main__":
-    # Run matrix effect in a separate thread to not block Flask app
-    matrix_thread = Thread(target=lambda: Matrix(100, 100, 100).start())
-    matrix_thread.daemon = True
-    matrix_thread.start()
-
-    # Start the Flask app
-    app_flask.run(host="0.0.0.0", port=8000)
-    
-    # Start CLI interface
-    app_cli()
+    start_matrix()
+    socketio.run(app, host="0.0.0.0", port=8000)

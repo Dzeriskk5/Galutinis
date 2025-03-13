@@ -4,12 +4,11 @@
 
 # Matrix Rain Effect with Flask and Socket.IO
 
-This project creates a dynamic Matrix rain effect using Flask and Socket.IO. The main goal is to set up a CI/CD pipeline to continuously update the code as changes are made.
+This project creates a dynamic Matrix rain effect using Flask. The main goal is to set up a CI/CD pipeline to continuously update the code as changes are made.
 
 ## Features
 - Dynamic Matrix rain effect
 - Responsive design
-- Real-time updates using Socket.IO
 - CI/CD pipeline for continuous deployment
 
 ## Project Structure
@@ -29,8 +28,6 @@ This project creates a dynamic Matrix rain effect using Flask and Socket.IO. The
 - `main.py`: Main Python script to run the Flask application.
 - `requirements.txt`: Python dependencies required for the project.
 - `nginx.conf`: Nginx configuration file to proxy requests to the Flask application.
-- `templates/`: Directory containing HTML templates.
-  - `index.html`: Main HTML template for the project.
 - `terraform/`: Directory containing Terraform configuration files.
   - `dev.tfvars`: Terraform variables for the development environment.
   - `main.tf`: Main Terraform configuration file.

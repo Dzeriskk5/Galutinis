@@ -1,66 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Parallax Image</title>
-  <style>
-    /* Container to hold the parallax effect */
-    .parallax-container {
-      position: relative;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    /* Parallax image with the effect */
-    .parallax-image {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("https://github.com/Dzeriskk5/Galutinis/blob/8ab412987f5a5be9bba93b8b9ea14628f495071b/Other/Matrix.png");
-      background-size: cover;
-      background-position: center;
-      transform: translateZ(0);
-      will-change: transform;
-      z-index: -1;
-      animation: scrollEffect 10s infinite linear;
-    }
-
-    /* Scroll effect keyframes */
-    @keyframes scrollEffect {
-      0% {
-        background-position: center top;
-      }
-      100% {
-        background-position: center bottom;
-      }
-    }
-
-    /* Content to show on top of the image */
-    .content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      text-align: center;
-      font-size: 2em;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="parallax-container">
-    <div class="parallax-image"></div>
-    <div class="content">
-      <h1>Matrix Banner</h1>
-    </div>
-  </div>
-
-</body>
-</html>
+<p align="center">
+    <img src="https://github.com/Dzeriskk5/Galutinis/blob/8ab412987f5a5be9bba93b8b9ea14628f495071b/Other/Matrix.png" width="60%">
+</p>
 
 
 NGINX (pronounced "engine x" or "en-jin-eks") is the world's most popular Web Server, high performance Load Balancer, Reverse Proxy, API Gateway and Content Cache.

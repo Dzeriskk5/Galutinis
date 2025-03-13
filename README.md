@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://github.com/Dzeriskk5/Galutinis/blob/8ab412987f5a5be9bba93b8b9ea14628f495071b/Other/Matrix.png" width="60%">
+    <img src="https://github.com/Dzeriskk5/Galutinis/blob/8ab412987f5a5be9bba93b8b9ea14628f495071b/Other/Matrix.png" width="100%">
 </p>
 
 

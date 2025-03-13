@@ -125,4 +125,4 @@ def start_matrix():
 
 if __name__ == "__main__":
     start_matrix()
-    socketio.run(app, host="0.0.0.0", port=8000)
+    socketio.run(app, host="0.0.0.0", port=8000, allow_unsafe_werkzeug=True)

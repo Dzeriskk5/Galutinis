@@ -1,4 +1,4 @@
-name: Terraform plan / apply / destroy
+name: Terraform Setup Or Destroy
 
 on:
     workflow_dispatch:
@@ -13,17 +13,17 @@ on:
                     - all
                 default: test
             action:
-                description: Choose plan/apply or destroy
+                description: Choose Setup or Destroy
                 required: true
-                default: "plan/apply"
+                default: "Setup"
                 type: choice
                 options:
-                    - plan/apply
+                    - Setup
                     - destroy
                     - test
 jobs:
     terraform:
-        name: Terraform plan/apply/destroy
+        name: Terraform Setup/Destroy
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -43,8 +43,8 @@ jobs:
                 echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
                 echo "AWS_DEFAULT_REGION=eu-central-1" >> $GITHUB_ENV
 
-            - name: Create S3 bucket and dynamodb table if chose plan/apply
-              if: ${{ github.event.inputs.action == 'plan/apply' }}
+            - name: Create S3 bucket and dynamodb table if chose Setup
+              if: ${{ github.event.inputs.action == 'Setup' }}
               run: |
                aws s3api create-bucket --bucket kibirs-tfstate-bucket --region eu-central-1 --create-bucket-configuration LocationConstraint=eu-central-1 || true
                aws s3api put-bucket-versioning --bucket kibirs-tfstate-bucket --versioning-configuration Status=Enabled
@@ -62,7 +62,7 @@ jobs:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               run: |
-                if [ "${{ github.event.inputs.action }}" == "plan/apply" ]; then
+                if [ "${{ github.event.inputs.action }}" == "Setup" ]; then
                   terraform plan -var-file=${{ github.event.inputs.environment }}.tfvars;
                   terraform apply -auto-approve -var-file=${{ github.event.inputs.environment }}.tfvars;
                   terraform output instance_ip
@@ -82,7 +82,7 @@ jobs:
             - name: Commit changes
               id: commit-step
               run: |
-                if [ "${{ github.event.inputs.action }}" == "plan/apply" ]; then
+                if [ "${{ github.event.inputs.action }}" == "Setup" ]; then
                   git config --global user.email "your-bot@example.com"
                   git config --global user.name "Your Bot"
                   git add ip_cache/ec2_ip.txt

@@ -1,0 +1,23 @@
+name: Health Check after deploy
+
+on:
+  workflow_run:
+    workflows: ["Deploy"]  # Runs after your "Deploy" workflow
+    types:
+      - completed
+
+jobs:
+  healthcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Wait for Deployment
+        run: sleep 30  # Give some time for the app to start
+
+      - name: Check Health Endpoint
+        run: |
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://your-app-url.com/health)
+          if [[ "$RESPONSE" -ne 200 ]]; then
+            echo "Health check failed!"
+            exit 1
+          fi

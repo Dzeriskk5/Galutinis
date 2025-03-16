@@ -2,7 +2,7 @@ name: Health Check
 
 on:
   workflow_run:
-    workflows: ["Deploy"]
+    workflows: ["Upload files"]
     types:
       - completed
 
@@ -25,7 +25,7 @@ jobs:
           echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
 
       - name: Wait for Deployment
-        run: sleep 30  # Give time for the site to start
+        run: sleep 300  # Give time for the site to start
 
       - name: Check Website Health
         run: |

@@ -42,20 +42,19 @@ jobs:
         run: |
           CLEAN_IP=$(echo "${{ env.EC2_IP }}" | tr -d '[:space:]' | tr -d ')')
           
-          # Attempt to perform the health check using curl
-          curl -s -o /dev/null -w "%{http_code}" http://$CLEAN_IP
+          # Attempt to perform the health check using curl and capture the HTTP response code
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://$CLEAN_IP)
           
-          # Capture curl exit code (not the HTTP code)
+          # Capture the curl exit code (curl return status)
           CURL_EXIT_CODE=$?
 
-          # Check if curl failed (exit code 7 means network issue)
+          # Check if curl failed due to network issues (exit code 7)
           if [[ $CURL_EXIT_CODE -eq 7 ]]; then
-            echo "Website was not found"
+            echo "Website was not found (curl exit code 7)"
             exit 1
           fi
 
-          # Check for HTTP status 200
-          RESPONSE=$?
+          # Check if the HTTP response code is 200 (OK)
           if [[ "$RESPONSE" -ne 200 ]]; then
             echo "Health check failed! HTTP Status: $RESPONSE"
             exit 1

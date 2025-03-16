@@ -1,6 +1,7 @@
 name: Health Check
 
 on:
+  workflow_dispatch: 
   workflow_run:
     workflows: ["Deploy Application"]
     types:

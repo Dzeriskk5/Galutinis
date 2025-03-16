@@ -40,7 +40,9 @@ jobs:
 
       - name: Check Website Health
         run: |
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ env.EC2_IP }})
+          # Remove any possible extra characters like spaces or parentheses
+          CLEAN_IP=$(echo "${{ env.EC2_IP }}" | tr -d '[:space:]' | tr -d ')')
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://$CLEAN_IP)
           if [[ "$RESPONSE" -ne 200 ]]; then
             echo "Health check failed!"
             exit 1

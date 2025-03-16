@@ -12,7 +12,7 @@ on:
           - skip-wait
 
   workflow_run:
-    workflows: ["Upload Files"]  # Runs after "Upload Files" workflow
+    workflows: ["Deploy Application"]  # Runs after "Upload Files" workflow
     types:
       - completed
 

@@ -1,7 +1,11 @@
 name: Deploy Application
 
 on:
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch: 
+  workflow_run:
+    workflows: ["Upload Files"]  
+    types:
+      - completed
 
 jobs:
   deploy:

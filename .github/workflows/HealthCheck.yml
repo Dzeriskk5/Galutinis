@@ -40,20 +40,20 @@ jobs:
 
       - name: Check Website Health
         run: |
+          # Disable immediate exit to capture curl's exit code
+          set +e
           CLEAN_IP=$(echo "${{ env.EC2_IP }}" | tr -d '[:space:]' | tr -d ')')
-          
-          # Attempt to perform the health check using curl and capture the HTTP response code
           RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://$CLEAN_IP)
-          
-          # Capture the curl exit code (curl return status)
           CURL_EXIT_CODE=$?
-
+          # Re-enable immediate exit
+          set -e
+      
           # Check if curl failed due to network issues (exit code 7)
           if [[ $CURL_EXIT_CODE -eq 7 ]]; then
             echo "Website was not found (curl exit code 7)"
             exit 1
           fi
-
+      
           # Check if the HTTP response code is 200 (OK)
           if [[ "$RESPONSE" -ne 200 ]]; then
             echo "Health check failed! HTTP Status: $RESPONSE"

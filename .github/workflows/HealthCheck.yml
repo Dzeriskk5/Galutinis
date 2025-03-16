@@ -1,4 +1,4 @@
-name: Health Check after deploy
+name: Health Check
 
 on:
   workflow_run:
@@ -11,13 +11,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Read EC2 IP Address
+        id: read_ip
+        run: |
+          IP=$(cat terraform/ip_cache/ec2_ip.txt)
+          echo "IP=$IP" >> $GITHUB_OUTPUT # Set output variable
+
+      - name: Set IP as Environment Variable
+        run: |
+          echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
+
       - name: Wait for Deployment
         run: sleep 30  # Give some time for the app to start
 
       - name: Check Health Endpoint
         run: |
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://your-app-url.com/health)
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://${{ env.EC2_IP }}/health)
           if [[ "$RESPONSE" -ne 200 ]]; then
             echo "Health check failed!"
             exit 1
           fi
+
+      - name: Confirm Success
+        run: echo "Health check passed successfully!"

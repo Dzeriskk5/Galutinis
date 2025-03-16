@@ -1,9 +1,18 @@
 name: Health Check
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:  # Allows manual triggering with inputs
+    inputs:
+      UserInput:
+        description: 'Choose deployment type'
+        required: true
+        default: 'skip-wait'  # Default value (can be overridden)
+        type: choice
+        options:
+          - skip-wait
+
   workflow_run:
-    workflows: ["Deploy Application"]
+    workflows: ["Upload Files"]  # Runs after "Upload Files" workflow
     types:
       - completed
 
@@ -25,8 +34,9 @@ jobs:
         run: |
           echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
 
-      - name: Wait for Deployment
-        run: sleep 300  # Give time for the site to start
+      - name: Wait for Deployment (if triggered automatically)
+        if: ${{ github.event.inputs.UserInput != 'skip-wait' }}  # Only wait if UserInput is not 'skip-wait'
+        run: sleep 300 
 
       - name: Check Website Health
         run: |

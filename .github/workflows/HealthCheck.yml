@@ -41,17 +41,23 @@ jobs:
       - name: Check Website Health
         run: |
           CLEAN_IP=$(echo "${{ env.EC2_IP }}" | tr -d '[:space:]' | tr -d ')')
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://$CLEAN_IP)
+          
+          # Attempt to perform the health check using curl
+          curl -s -o /dev/null -w "%{http_code}" http://$CLEAN_IP
+          
+          # Capture curl exit code (not the HTTP code)
+          CURL_EXIT_CODE=$?
 
-          # Check for specific curl error code
-          if [[ "$RESPONSE" -ne 200 ]]; then
-            echo "Health check failed!"
+          # Check if curl failed (exit code 7 means network issue)
+          if [[ $CURL_EXIT_CODE -eq 7 ]]; then
+            echo "Website was not found"
             exit 1
           fi
 
-          # Catch curl error code 7 (connection failure) and show custom message
-          if [[ $? -eq 7 ]]; then
-            echo "Website was not found"
+          # Check for HTTP status 200
+          RESPONSE=$?
+          if [[ "$RESPONSE" -ne 200 ]]; then
+            echo "Health check failed! HTTP Status: $RESPONSE"
             exit 1
           fi
 

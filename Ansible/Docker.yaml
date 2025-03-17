@@ -4,12 +4,11 @@
   become: true
 
   tasks:
-    # Update apt repository and cache
     - name: Update apt repository and cache
       apt:
         update_cache: yes
 
-    # Install required packages using apt
+    # Install required packages
     - name: Install required packages
       apt:
         name: 
@@ -75,7 +74,6 @@
         msg: "Docker installation failed. Please check the logs and try again."
       when: docker_version.rc != 0
 
-    # Print Docker version
     - name: Docker version
       debug:
         msg: "Docker installed successfully: {{ docker_version.stdout }}"

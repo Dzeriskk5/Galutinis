@@ -4,33 +4,27 @@ from flask import Flask
 from flask_socketio import SocketIO
 from threading import Thread
 
-# Initializing the Flask app
 app = Flask(__name__)
 socketio = SocketIO(app)
 
-# Constants for the Matrix effect
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()"
-delay = 0.05  # Faster update interval for smoother movement
+delay = 0.05
 
-# Dynamic matrix size
 matrix = []
 MATRIX_WIDTH = 0
 MATRIX_HEIGHT = 0
-
-# Initialize a list to track the position of falling drops
 drops = []
 
 def update_matrix():
     global matrix, MATRIX_WIDTH, MATRIX_HEIGHT, drops
     while True:
-        # Ensure that MATRIX_WIDTH and MATRIX_HEIGHT are non-zero
         if MATRIX_WIDTH == 0 or MATRIX_HEIGHT == 0:
             time.sleep(0.1)
-            continue  # Wait until the matrix size is set
+            continue
 
         # Generate new drops and add trails to them
-        if random.random() < 0.5:  # Increased chance of new drops appearing each cycle (50%)
-            for _ in range(random.randint(5, 10)):  # Randomly create 5 to 10 drops per cycle (increased)
+        if random.random() < 0.5:  # Increased chance of new drops appearing each cycle
+            for _ in range(random.randint(5, 10)):  # Randomly create 5 to 10 drops per cycle 
                 col = random.randint(0, MATRIX_WIDTH - 1)
                 trail_length = random.randint(5, 15)  # Random trail length between 5 and 15
                 drops.append({"row": 0, "col": col, "trail": [], "trail_length": trail_length})
@@ -45,12 +39,11 @@ def update_matrix():
                 if len(drop["trail"]) > drop["trail_length"]:
                     drop["trail"].pop(0)  # Keep trail length within bounds
             else:
-                drops.remove(drop)  # Remove drop when it reaches the bottom
+                drops.remove(drop)
 
         # Update matrix with the drops and their trails
         matrix = [[" " for _ in range(MATRIX_WIDTH)] for _ in range(MATRIX_HEIGHT)]
         for drop in drops:
-            # Update the matrix with each trail segment, ensuring we are within bounds
             for i, char in enumerate(drop["trail"]):
                 row = drop["row"] - len(drop["trail"]) + i + 1  # Positioning the trail vertically
                 if 0 <= row < MATRIX_HEIGHT and 0 <= drop["col"] < MATRIX_WIDTH:  # Ensure row and col are within bounds
@@ -107,7 +100,7 @@ def set_size():
     MATRIX_HEIGHT = int(request.args.get("height", 20))
 
     if MATRIX_WIDTH == 0 or MATRIX_HEIGHT == 0:
-        return "Invalid matrix size", 400  # Return error if the size is zero
+        return "Invalid matrix size", 400
 
     # Reset drops when the size changes
     drops = []

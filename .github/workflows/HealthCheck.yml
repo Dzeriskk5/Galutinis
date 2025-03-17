@@ -1,18 +1,18 @@
 name: Health Check
 
 on:
-  workflow_dispatch:  # Allows manual triggering with inputs
+  workflow_dispatch:
     inputs:
       UserInput:
         description: 'Choose deployment type'
         required: true
-        default: 'skip-wait'  # Default value (can be overridden)
+        default: 'skip-wait'
         type: choice
         options:
           - skip-wait
 
   workflow_run:
-    workflows: ["Deploy Application"]  # Runs after "Upload Files" workflow
+    workflows: ["Deploy Application"]
     types:
       - completed
 
@@ -35,7 +35,7 @@ jobs:
           echo "EC2_IP=${{ steps.read_ip.outputs.IP }}" >> $GITHUB_ENV
 
       - name: Wait for Deployment (if triggered automatically)
-        if: ${{ github.event.inputs.UserInput != 'skip-wait' }}  # Only wait if UserInput is not 'skip-wait'
+        if: ${{ github.event.inputs.UserInput != 'skip-wait' }} 
         run: sleep 10 
 
       - name: Check Website Health
@@ -48,13 +48,11 @@ jobs:
           # Re-enable immediate exit
           set -e
       
-          # Check if curl failed due to network issues (exit code 7)
           if [[ $CURL_EXIT_CODE -eq 7 ]]; then
             echo "Website was not found (curl exit code 7)"
             exit 1
           fi
       
-          # Check if the HTTP response code is 200 (OK)
           if [[ "$RESPONSE" -ne 200 ]]; then
             echo "Health check failed! HTTP Status: $RESPONSE"
             exit 1

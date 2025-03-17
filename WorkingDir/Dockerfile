@@ -1,7 +1,5 @@
-# Use an Alpine base image
 FROM alpine:3.18
 
-# Install Python, pip, Nginx, and dependencies
 RUN apk update && \
     apk add --no-cache \
     python3 \
@@ -26,5 +24,5 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 # Expose the ports for both Python and Nginx
 EXPOSE 80 8000
 
-# Start Nginx and Python application (using direct commands)
+# Start Nginx and Python application
 CMD nginx && python main.py

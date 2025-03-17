@@ -10,7 +10,6 @@ jobs:
     Update-Files:
         runs-on: ubuntu-latest
         steps:
-        #Checkout code so that the palybook is accessible
             - name: Checkout code
               uses: actions/checkout@v4
 
